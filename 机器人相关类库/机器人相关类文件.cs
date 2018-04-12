@@ -1966,7 +1966,7 @@ namespace RobotClassLib
             }
             catch (Exception ex)
             {
-                throw new Exception("未能成功开启串口");// MessageBox.Show(ex.Message, "未能成功开启串口", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw new Exception("未能成功开启串口"+ex.ToString());// MessageBox.Show(ex.Message, "未能成功开启串口", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
             }
         }
@@ -1975,9 +1975,6 @@ namespace RobotClassLib
         /// </summary>
         public void CloseCom()
         {
-         
-
-    
             try
             {
                 //关闭串口
@@ -1985,7 +1982,7 @@ namespace RobotClassLib
             }
             catch (Exception ex)
             {
-                throw new Exception("串口关闭错误"); //MessageBox.Show(ex.Message, "串口关闭错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw new Exception("串口关闭错误"+ex.ToString()); //MessageBox.Show(ex.Message, "串口关闭错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         /// <summary>
@@ -2005,7 +2002,7 @@ namespace RobotClassLib
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("发送失败"); //MessageBox.Show(ex.Message, "发送失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    throw new Exception("发送失败"+ex.ToString()); //MessageBox.Show(ex.Message, "发送失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else

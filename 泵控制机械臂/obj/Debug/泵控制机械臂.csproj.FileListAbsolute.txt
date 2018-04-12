@@ -23,5 +23,4 @@ D:\程磊\华大基因\黑贝项目\泵控制机械臂\obj\Debug\泵控制机械
 D:\程磊\华大基因\黑贝项目\泵控制机械臂\obj\Debug\机械臂控制软件.Properties.Resources.resources
 D:\程磊\华大基因\黑贝项目\泵控制机械臂\obj\Debug\机械臂控制软件.泵控制机械臂界面.resources
 D:\程磊\华大基因\黑贝项目\泵控制机械臂\obj\Debug\泵控制机械臂.csproj.GenerateResource.Cache
-D:\程磊\华大基因\黑贝项目\泵控制机械臂\bin\Debug\机器人相关类库.dll
 D:\程磊\华大基因\黑贝项目\泵控制机械臂\bin\Debug\机器人相关类库.pdb
