@@ -1,0 +1,14 @@
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\bin\Release\机械臂控制软件.exe.config
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\obj\Release\Interop.MLApp.dll
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\obj\Release\打孔器机械臂.csproj.ResolveComReference.cache
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\bin\Release\机械臂控制软件.exe
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\bin\Release\机械臂控制软件.pdb
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\bin\Release\MWArray.dll
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\bin\Release\控件.dll
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\bin\Release\控件.pdb
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\obj\Release\机械臂控制软件.Properties.Resources.resources
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\obj\Release\机械臂控制软件.打孔器机械臂界面.resources
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\obj\Release\打孔器机械臂.csproj.GenerateResource.Cache
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\obj\Release\机械臂控制软件.exe
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\obj\Release\机械臂控制软件.pdb
+D:\程磊\华大基因\机械臂上位机20180310\机械臂控制软件\机械臂控制软件\obj\Release\打孔器机械臂.csprojResolveAssemblyReference.cache
