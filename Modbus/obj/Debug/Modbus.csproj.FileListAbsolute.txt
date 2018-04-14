@@ -1,0 +1,10 @@
+D:\Sincronia\SkyDrive\Files\Lavoro\Progetti\Visual Studio\Modbus\Modbus\bin\Debug\Modbus.dll
+D:\Sincronia\SkyDrive\Files\Lavoro\Progetti\Visual Studio\Modbus\Modbus\bin\Debug\Modbus.pdb
+D:\Sincronia\SkyDrive\Files\Lavoro\Progetti\Visual Studio\Modbus\Modbus\obj\Debug\Modbus.dll
+D:\Sincronia\SkyDrive\Files\Lavoro\Progetti\Visual Studio\Modbus\Modbus\obj\Debug\Modbus.pdb
+D:\Sincronia\SkyDrive\Files\Lavoro\Progetti\Visual Studio\Modbus\Modbus\obj\Debug\Modbus.csprojResolveAssemblyReference.cache
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\Modbus\bin\Debug\Modbus.dll
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\Modbus\bin\Debug\Modbus.pdb
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\Modbus\obj\Debug\Modbus.csprojResolveAssemblyReference.cache
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\Modbus\obj\Debug\Modbus.dll
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\Modbus\obj\Debug\Modbus.pdb

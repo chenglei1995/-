@@ -1620,6 +1620,8 @@
             // 
             // userControl11
             // 
+            this.userControl11.i_Coordinate = -1;
+            this.userControl11.j_Coordinate = -1;
             this.userControl11.Location = new System.Drawing.Point(21, 38);
             this.userControl11.Name = "userControl11";
             this.userControl11.Size = new System.Drawing.Size(408, 215);
@@ -1651,7 +1653,7 @@
             this.MaximizeBox = false;
             this.Name = "打孔器机械臂界面";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Text = "打孔器机械臂";
+            this.Text = " ";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.机械臂控制软件界面_FormClosed);
             this.tabControl_control_robot.ResumeLayout(false);
             this.TabPages_pose.ResumeLayout(false);
