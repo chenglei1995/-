@@ -6,14 +6,18 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "泵控制机械臂", "泵控制机械臂\泵控制机械臂.csproj", "{B6E25BD1-45F0-4157-8806-8FA36641AF05}"
 	ProjectSection(ProjectDependencies) = postProject
 		{819A6B90-1FE8-4E2D-AB5D-54B19B8D1AEB} = {819A6B90-1FE8-4E2D-AB5D-54B19B8D1AEB}
+		{B6468DD5-58C4-4950-B3F6-DAF30A384F55} = {B6468DD5-58C4-4950-B3F6-DAF30A384F55}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "打孔器机械臂", "打孔器机械臂\打孔器机械臂.csproj", "{85DB45EA-319A-40F7-B4D4-65D41A20C214}"
 	ProjectSection(ProjectDependencies) = postProject
 		{819A6B90-1FE8-4E2D-AB5D-54B19B8D1AEB} = {819A6B90-1FE8-4E2D-AB5D-54B19B8D1AEB}
+		{B6468DD5-58C4-4950-B3F6-DAF30A384F55} = {B6468DD5-58C4-4950-B3F6-DAF30A384F55}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "机器人相关类库", "机器人相关类库\机器人相关类库.csproj", "{819A6B90-1FE8-4E2D-AB5D-54B19B8D1AEB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Modbus", "Modbus\Modbus.csproj", "{B6468DD5-58C4-4950-B3F6-DAF30A384F55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,10 @@ Global
 		{819A6B90-1FE8-4E2D-AB5D-54B19B8D1AEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{819A6B90-1FE8-4E2D-AB5D-54B19B8D1AEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{819A6B90-1FE8-4E2D-AB5D-54B19B8D1AEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6468DD5-58C4-4950-B3F6-DAF30A384F55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6468DD5-58C4-4950-B3F6-DAF30A384F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6468DD5-58C4-4950-B3F6-DAF30A384F55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6468DD5-58C4-4950-B3F6-DAF30A384F55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

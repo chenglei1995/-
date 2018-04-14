@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Modbus">
+      <HintPath>..\Modbus\bin\Debug\Modbus.dll</HintPath>
+    </Reference>
     <Reference Include="MWArray, Version=2.17.1.0, Culture=neutral, PublicKeyToken=e1d84a0da19db86f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\MWArray.dll</HintPath>
@@ -54,7 +57,7 @@
     </Reference>
     <Reference Include="机器人相关类库, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>bin\Debug\机器人相关类库.dll</HintPath>
+      <HintPath>..\机器人相关类库\bin\Debug\机器人相关类库.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

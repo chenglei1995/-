@@ -1,0 +1,11 @@
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\bin\Debug\SlaverTCP.exe.config
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\bin\Debug\SlaverTCP.exe
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\bin\Debug\SlaverTCP.pdb
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\bin\Debug\Modbus.dll
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\bin\Debug\Modbus.pdb
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.SlaverTCP.resources
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.Properties.Resources.resources
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.csproj.GenerateResource.Cache
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.exe
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.pdb
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.csprojResolveAssemblyReference.cache

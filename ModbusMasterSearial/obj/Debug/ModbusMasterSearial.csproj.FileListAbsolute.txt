@@ -1,0 +1,11 @@
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\bin\Debug\ModbusMasterSearial.exe.config
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\bin\Debug\ModbusMasterSearial.exe
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\bin\Debug\ModbusMasterSearial.pdb
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\obj\Debug\ModbusMasterSearial.csprojResolveAssemblyReference.cache
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\obj\Debug\ModbusMasterSearial.Properties.Resources.resources
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\obj\Debug\ModbusMasterSearial.csproj.GenerateResource.Cache
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\obj\Debug\ModbusMasterSearial.exe
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\obj\Debug\ModbusMasterSearial.pdb
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\bin\Debug\Modbus.dll
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\bin\Debug\Modbus.pdb
+C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\ModbusMasterSearial\obj\Debug\ModbusMasterSearial.Mater.resources
