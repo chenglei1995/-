@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Modbus.ModbusMaster" Collapsed="true">
+    <Position X="0.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>UAYAAIBAICAAYBAAAEAiAIAAAACQAAgAAAAAACCCAAg=</HashCode>
+      <FileName>Modbus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Modbus.ModbusSlave" Collapsed="true">
+    <Position X="3" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAIAgAAAAwAgAAAgBFAAAAAAAAAAUAAAAAAAQACAJA=</HashCode>
+      <FileName>Modbus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Modbus.ModbusBase" Collapsed="true">
+    <Position X="1.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgDAAIAIAgAAAQAgAAkAgYgLSABJgAAgBQACAAAAAgA=</HashCode>
+      <FileName>Modbus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Modbus.Datastore" Collapsed="true">
+    <Position X="4.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAEAAACAQAAAAAACABAAAhAAAAACAAAAAEAEAAAAAAA=</HashCode>
+      <FileName>Modbus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

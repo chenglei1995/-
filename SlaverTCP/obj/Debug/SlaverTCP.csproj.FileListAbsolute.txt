@@ -9,3 +9,14 @@ C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\o
 C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.exe
 C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.pdb
 C:\Users\chenglei\Desktop\rs485总线\ModBus\modbus_v1_0_2_0.src.bin\SlaverTCP\obj\Debug\SlaverTCP.csprojResolveAssemblyReference.cache
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\bin\Debug\SlaverTCP.exe.config
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.exe
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.pdb
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\bin\Debug\SlaverTCP.exe
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\bin\Debug\SlaverTCP.pdb
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\bin\Debug\Modbus.dll
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\bin\Debug\Modbus.pdb
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.csprojResolveAssemblyReference.cache
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.SlaverTCP.resources
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.Properties.Resources.resources
+C:\Users\TD\Desktop\黑贝项目\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.csproj.GenerateResource.Cache

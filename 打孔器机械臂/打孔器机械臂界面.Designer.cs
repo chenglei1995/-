@@ -404,6 +404,7 @@
             0,
             0,
             0});
+            this.numericUpDown_distance.ValueChanged += new System.EventHandler(this.numericUpDown_distance_ValueChanged);
             // 
             // TabPages_angle_relative
             // 

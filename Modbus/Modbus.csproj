@@ -48,6 +48,9 @@
     <Content Include="ReadMe.txt" />
     <Content Include="ReleaseNotes.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

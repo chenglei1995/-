@@ -1090,7 +1090,7 @@ namespace 机械臂控制软件
             {
                 robot1.HoleChoose = (bool[,])userControl11.Checks.Clone();
             }
-            else if (!userControl11.Enabled && !robot1.KeyPointFinished || !robot1.HoleKeyPointFinished)
+            else if (!userControl11.Enabled && (!robot1.KeyPointFinished || !robot1.HoleKeyPointFinished))//如果关键点还没添加完成
             {
                 for (int k = 0; k < 8; k++)
                 {
@@ -1116,19 +1116,13 @@ namespace 机械臂控制软件
                     userControl11.Checks[7, 11] = true;
                 }
             }
-            else
+            else//添加完成以后
             {
-                for (int k = 0; k < 8; k++)
-                {
-                    for (int w = 0; w < 12; w++)
-                    {
-                        userControl11.Checks[k, w] = false;
-                    }
-                }
                 int i = 0;
                 int j = 0;
                 robot1.Trans1DTo2D(ref i, ref j, robot1.TransStepToHoleStep(robot1.Step));
-                userControl11.Checks[i, j] = true;
+                userControl11.i_Coordinate = i;
+                userControl11.j_Coordinate = j;
             }
         }
         /// <summary>

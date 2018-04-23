@@ -18,42 +18,37 @@ namespace SlaverTCP
 {
     public partial class SlaverTCP : Form
     {
-        bool ifrun = true;
+      
+        static Datastore ds = new Datastore(1);
+        ModbusSlaveTCP ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse("192.168.0.1") , 502);
         public SlaverTCP()
         {
             InitializeComponent();
+            textBox4.Text = "192.168.0.1";
+            textBox5.Text = "1";
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            byte unit_id = 1;
-            // Created datastore for unit ID 1
-            Datastore ds = new Datastore(unit_id);
-            // Crete instance of modbus serial RTU (replace COMx with a free serial port - ex. COM5)
-            ModbusSlaveTCP ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse("192.168.0.2"),502);
-            // Start listen
-            ms.StartListen();
-            // Print and write some registers...
-            Random rnd = new Random();
-            while (ifrun)
+            if(button1.Text== "开启")
             {
-                textBox1.Text = "Holding register n.1  : " + ms.ModbusDB.Single(x => x.UnitID == unit_id).HoldingRegisters[0].ToString("D5") +
-                    "Holding register n.41 : " + ms.ModbusDB.Single(x => x.UnitID == unit_id).HoldingRegisters[40].ToString("D5") +
-                    "Coil register    n.23 : " + ms.ModbusDB.Single(x => x.UnitID == unit_id).Coils[22].ToString();
-               
-                textBox2.Text = "Holding register n.5  : " + ms.ModbusDB.Single(x => x.UnitID == unit_id).HoldingRegisters[4].ToString("D5");
-                
-                textBox3.Text = "Coil register    n.3 : " + ms.ModbusDB.Single(x => x.UnitID == unit_id).Coils[2].ToString();
-                // Exec the cicle each 2 seconds
-                delayTime(2);
+                // Created datastore for unit ID 1
+                ds = new Datastore(byte.Parse(textBox5.Text));
+                // Crete instance of modbus serial RTU (replace COMx with a free serial port - ex. COM5)
+                ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse(textBox4.Text), 502);
+                // Start listen
+                ms.StartListen();
+                button1.Text = "关闭";
             }
-            ms.StopListen();
+           else
+            {
+                ms.StopListen();
+                button1.Text = "开启";
+            }
+            
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            ifrun = false;
-        }
+    
         /// <summary>
         /// 延时函数
         /// </summary>
@@ -66,6 +61,14 @@ namespace SlaverTCP
                 Application.DoEvents();//待定，空执行
             }
         }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if(button1.Text == "关闭")
+            {
+                textBox1.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).HoldingRegisters[4].ToString("D5");
+                textBox2.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).Coils[2].ToString();
+            }
+        }
     }
-  
 }
