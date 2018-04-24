@@ -1024,11 +1024,6 @@ namespace 机械臂控制软件
             }
         }
 
-        private void numericUpDown_distance_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
         /// <summary>
         /// 速度设置变化
         /// </summary>

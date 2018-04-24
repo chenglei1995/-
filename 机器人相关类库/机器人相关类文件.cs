@@ -2633,7 +2633,7 @@ namespace RobotClassLib
             LTDMC.dmc_get_position_unit(card_id, axisb, ref K[4]);
             LTDMC.dmc_get_position_unit(card_id, axisc, ref K[5]);
             keypoint.Add(K);
-            KeyPoint = keypoint;//给属性赋值，触发属性改变事件，下同
+            KeyPoint = (ArrayList)keypoint.Clone();//给属性赋值，触发属性改变事件，下同
         }
         /// <summary>
         /// 添加孔位点
@@ -2648,7 +2648,7 @@ namespace RobotClassLib
             LTDMC.dmc_get_position_unit(card_id, axisb, ref H[4]);
             LTDMC.dmc_get_position_unit(card_id, axisc, ref H[5]);
             holekeypoint.Add(H);
-            HoleKeyPoint = holekeypoint;
+            HoleKeyPoint = (ArrayList)holekeypoint.Clone();
         }
         /// <summary>
         /// 添加holekeypoint后，生成holepoint
@@ -2735,7 +2735,7 @@ namespace RobotClassLib
                         q[w] = Q0[j, w];
                     }
                     holepoint.Add(q);
-                    HolePoint = holepoint;
+                    HolePoint = (ArrayList)holepoint.Clone();
                 }
             }
         }
@@ -2745,7 +2745,7 @@ namespace RobotClassLib
         public void DeleteKeyPoint()
         {
             keypoint.RemoveAt(keypoint.Count - 1);
-            KeyPoint = keypoint;
+            KeyPoint = (ArrayList)keypoint.Clone();
         }
         /// <summary>
         /// 删除HolePoint
@@ -2753,7 +2753,7 @@ namespace RobotClassLib
         public void DeleteHolePoint()
         {
             holepoint.RemoveAt(holepoint.Count - 1);
-            HolePoint = holepoint;
+            HolePoint = (ArrayList)holepoint.Clone();
         }
         /// <summary>
         /// 删除holekeypoint
@@ -2761,7 +2761,7 @@ namespace RobotClassLib
         public void DeleteHoleKeyPoint()
         {
             holekeypoint.RemoveAt(holekeypoint.Count - 1);
-            HoleKeyPoint = holekeypoint;
+            HoleKeyPoint = (ArrayList)holekeypoint.Clone();
         }
         /// <summary>
         /// 添加Q

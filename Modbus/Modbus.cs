@@ -23,6 +23,36 @@ namespace Modbus
 {
     #region Custom Events Args
 
+    public class DatastoreChangedEventArgs:EventArgs
+    {
+        private Dictionary<ushort, bool> coilschanged = new Dictionary<ushort, bool>();
+        private Dictionary<ushort, ushort> registerschanged = new Dictionary<ushort, ushort>();
+        public Dictionary<ushort,bool> CoilsChanged
+        {
+            get { return coilschanged; }
+            set
+            {
+                coilschanged = value;
+            }
+        }
+        public Dictionary<ushort,ushort> RegistersChanged
+        {
+            get { return registerschanged; }
+            set { registerschanged = value; }
+        }
+        public  DatastoreChangedEventArgs(ushort key,bool v_coil)
+        {
+            coilschanged.Add(key, v_coil);
+        }
+        public DatastoreChangedEventArgs(ushort key,ushort v_register)
+        {
+            registerschanged.Add(key, v_register);
+        }
+        public DatastoreChangedEventArgs()
+        {
+
+        }
+    }
     /// <summary>
     /// Event args for remote endpoint connection
     /// </summary>
@@ -1292,6 +1322,9 @@ namespace Modbus
     /// </summary>
     public abstract class ModbusSlave : ModbusBase
     {
+       
+        public delegate void DatastoreHandler();
+        public event DatastoreHandler DatastoreChanged;
         #region Global variables
 
         /// <summary>
@@ -1332,8 +1365,14 @@ namespace Modbus
         /// </summary>
         public Datastore[] ModbusDB
         {
-            get { return modbus_db; }
-            set { modbus_db = value; }
+            get
+            {
+                return modbus_db;
+            }
+            set
+            {
+                modbus_db = value;
+            }
         }
 
         #endregion
@@ -1931,14 +1970,18 @@ namespace Modbus
                         break;
                     }
                     try
-                    {
-                        modbus_db.Single(x => x.UnitID == unit_id).Coils[sa] = cv;
-                    }
-                    catch
-                    {
-                        BuildExceptionMessage(send_buffer, mdbcode, Errors.EXCEPTION_SLAVE_DEVICE_FAILURE);
-                        break;
-                    }
+                     {
+                         modbus_db.Single(x => x.UnitID == unit_id).Coils[sa] = cv;
+                         if (DatastoreChanged != null)
+                         {
+                            DatastoreChanged();//写入单个线圈
+                          } 
+                     }
+                    catch(Exception e)
+                     {
+                         BuildExceptionMessage(send_buffer, mdbcode, Errors.EXCEPTION_SLAVE_DEVICE_FAILURE);
+                         break;
+                     }
                     // Reply
                     send_buffer.Add((byte)ModbusCodes.WRITE_SINGLE_COIL);
                     send_buffer.AddRange(GetBytes(sa));
@@ -1969,7 +2012,13 @@ namespace Modbus
                     }
                     try
                     {
+                      
                         modbus_db.Single(x => x.UnitID == unit_id).HoldingRegisters[sa] = val;
+                        if (DatastoreChanged != null)
+                        {
+
+                            DatastoreChanged();//写入单个寄存器
+                        }
                     }
                     catch
                     {
@@ -1980,7 +2029,9 @@ namespace Modbus
                     send_buffer.Add((byte)ModbusCodes.WRITE_SINGLE_REGISTER);
                     send_buffer.AddRange(GetBytes(sa));
                     send_buffer.AddRange(GetBytes(val));
+                    
                     break;
+                  
 
                 case ModbusCodes.WRITE_MULTIPLE_COILS:
                     // Adjusting
@@ -2010,6 +2061,12 @@ namespace Modbus
                     try
                     {
                         ba.CopyTo(modbus_db.Single(x => x.UnitID == unit_id).Coils, sa);
+                        DatastoreChangedEventArgs coilsargs = new DatastoreChangedEventArgs();
+                        for(ushort i=0;i< ba.Length;i++)
+                        {
+                            coilsargs.CoilsChanged.Add((ushort)(sa + i), modbus_db.Single(x => x.UnitID == unit_id).Coils[sa + i]);
+                        }
+                        DatastoreChanged();
                     }
                     catch
                     {
@@ -2047,8 +2104,14 @@ namespace Modbus
                     bc = receive_buffer[5];
                     try
                     {
-                        for (int ii = 0; ii < bc; ii += 2)
+                        DatastoreChangedEventArgs registersargs = new DatastoreChangedEventArgs();
+                        for (int ii = 0; ii < bc; ii += 2)//写多个寄存器触发事件
+                        {
                             modbus_db.Single(x => x.UnitID == unit_id).HoldingRegisters[sa + (ii / 2)] = ToUInt16(receive_buffer.ToArray(), 6 + ii);
+                            registersargs.RegistersChanged.Add((ushort)(sa + (ii / 2)), ToUInt16(receive_buffer.ToArray(), 6 + ii));
+                        }
+                        DatastoreChanged();
+                            
                     }
                     catch
                     {
@@ -2131,8 +2194,13 @@ namespace Modbus
                     // First: Exec writing...
                     try
                     {
+                        DatastoreChangedEventArgs registerargs = new DatastoreChangedEventArgs();
                         for (int ii = 0; ii < bc; ii += 2)
+                        {
                             modbus_db.Single(x => x.UnitID == unit_id).HoldingRegisters[sa1 + (ii / 2)] = ToUInt16(receive_buffer.ToArray(), 10 + ii);
+                            registerargs.RegistersChanged.Add((ushort)(sa1 + (ii / 2)), ToUInt16(receive_buffer.ToArray(), 10 + ii));
+                        }
+                       // DatastoreChanged(this, registerargs);  
                     }
                     catch
                     {
@@ -2161,6 +2229,7 @@ namespace Modbus
             }
             // Send response
             SendReply(send_buffer, flux, unit_id, transaction_id);
+            
         }
 
         /// <summary>
@@ -2483,8 +2552,7 @@ namespace Modbus
                 if (ipe != null)
                 {
                     remote_clients_connected.Remove(ipe);
-                    EventHandler<ModbusTCPUDPClientConnectedEventArgs> discon_handler =
-                        TCPClientDisconnected;
+                    EventHandler<ModbusTCPUDPClientConnectedEventArgs> discon_handler = TCPClientDisconnected;
                     if (discon_handler != null)
                         discon_handler(this, new ModbusTCPUDPClientConnectedEventArgs(ipe));
                 }
@@ -3174,7 +3242,7 @@ namespace Modbus
         /// <summary>
         /// Holding registers - Read/Write - 16 bit
         /// </summary>
-        ushort[] holding_registers;
+        public ushort[] holding_registers;
 
         /// <summary>
         /// Device ID
@@ -3191,7 +3259,11 @@ namespace Modbus
         public bool[] DiscreteInputs
         {
             get { return discrete_inputs; }
-            set { discrete_inputs = value; }
+            set
+            {
+                discrete_inputs = value;
+                
+            }
         }
 
         /// <summary>
@@ -3200,7 +3272,10 @@ namespace Modbus
         public bool[] Coils
         {
             get { return coils; }
-            set { coils = value; }
+            set
+            {
+                    coils = value;
+            }
         }
 
         /// <summary>
@@ -3209,7 +3284,10 @@ namespace Modbus
         public ushort[] InputRegisters
         {
             get { return input_registers; }
-            set { input_registers = value; }
+            set
+            {
+                    input_registers = value;
+            }
         }
 
         /// <summary>
@@ -3218,7 +3296,10 @@ namespace Modbus
         public ushort[] HoldingRegisters
         {
             get { return holding_registers; }
-            set { holding_registers = value; }
+            set
+            {
+                    holding_registers = value;
+            }
         }
 
         /// <summary>
@@ -3403,4 +3484,5 @@ namespace Modbus
     }
 
     #endregion
+
 }

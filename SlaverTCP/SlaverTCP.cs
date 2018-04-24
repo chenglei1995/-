@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using System.IO.Ports;
 using Modbus;
 using System.Threading;
@@ -18,7 +17,6 @@ namespace SlaverTCP
 {
     public partial class SlaverTCP : Form
     {
-      
         static Datastore ds = new Datastore(1);
         ModbusSlaveTCP ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse("192.168.0.1") , 502);
         public SlaverTCP()
@@ -36,19 +34,17 @@ namespace SlaverTCP
                 ds = new Datastore(byte.Parse(textBox5.Text));
                 // Crete instance of modbus serial RTU (replace COMx with a free serial port - ex. COM5)
                 ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse(textBox4.Text), 502);
-                // Start listen
-                ms.StartListen();
+                ms.DatastoreChanged += DatastoreChangedManage;
+               // Start listen
+               ms.StartListen();
                 button1.Text = "关闭";
             }
            else
             {
                 ms.StopListen();
                 button1.Text = "开启";
-            }
-            
+            } 
         }
-
-    
         /// <summary>
         /// 延时函数
         /// </summary>
@@ -61,14 +57,15 @@ namespace SlaverTCP
                 Application.DoEvents();//待定，空执行
             }
         }
-
-        private void timer1_Tick(object sender, EventArgs e)
+        private void DatastoreChangedManage()
         {
             if(button1.Text == "关闭")
             {
-                textBox1.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).HoldingRegisters[4].ToString("D5");
-                textBox2.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).Coils[2].ToString();
+                Thread.Sleep(100);
+               // textBox1.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).HoldingRegisters[4].ToString("D5");
+                //textBox2.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).Coils[2].ToString();
             }
         }
+      
     }
 }
