@@ -31,9 +31,9 @@ namespace SlaverTCP
             if(button1.Text== "开启")
             {
                 // Created datastore for unit ID 1
-                ds = new Datastore(byte.Parse(textBox5.Text));
+            //    ds = new Datastore(byte.Parse(textBox5.Text));
                 // Crete instance of modbus serial RTU (replace COMx with a free serial port - ex. COM5)
-                ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse(textBox4.Text), 502);
+               // ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse(textBox4.Text), 502);
                 ms.DatastoreChanged += DatastoreChangedManage;
                // Start listen
                ms.StartListen();
@@ -57,7 +57,7 @@ namespace SlaverTCP
                 Application.DoEvents();//待定，空执行
             }
         }
-        private void DatastoreChangedManage()
+        private void DatastoreChangedManage(object source,DatastoreChangedEventArgs e)
         {
             if(button1.Text == "关闭")
             {

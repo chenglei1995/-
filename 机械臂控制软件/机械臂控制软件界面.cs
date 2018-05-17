@@ -16,6 +16,9 @@ using System.Threading;
 using static System.Math;
 using System.IO;
 using System.Runtime.InteropServices;
+using Modbus;
+using System.Net;
+using System.Net.Sockets;
 
 namespace 机械臂控制软件
 {
@@ -27,6 +30,8 @@ namespace 机械臂控制软件
         Robot robot1 = new Robot(_cardid);
         short board_num = 0;
         private EventCheckChange checkstep=new EventCheckChange();
+        static Datastore ds = new Datastore(3);
+        ModbusSlaveTCP ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse("192.168.0.3"), 502);
         /// <summary>
         /// 界面初始化
         /// </summary>
@@ -90,9 +95,29 @@ namespace 机械臂控制软件
             m_thread.Start();
             robot1.PlotRobot = true;//开启图像仿真
             timer1.Start();
-         //  double[] q0 = new double[6] { PI / 2, PI / 2, 0, 0, 0, 0 };
-           //PaintRobot(q0);
+            //  double[] q0 = new double[6] { PI / 2, PI / 2, 0, 0, 0, 0 };
+            //PaintRobot(q0);
         }
+        /// <summary>
+        /// 数据接收事件
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
+        private void DatastoreChangedManage(object source, DatastoreChangedEventArgs e)
+        {
+            int times = Convert.ToInt32(numericUpDown_cycle_times.Value);
+            int n = robot1.StepWork.Count - 1;
+            for (int i = 0; i < times; i++)
+            {
+                robot1.Start(0, n);
+            }
+            ms.ModbusDB.Single(x => x.UnitID == 3).Coils[0] = false;//执行完后将Coils[0]置为false
+        }
+        /// <summary>
+        /// step值改变函数
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void event_stepchange(object sender, EventArgs e)
         {
             DynamicDisplayListView();
@@ -316,6 +341,27 @@ namespace 机械臂控制软件
             int n = decimal.ToInt32(numericUpDown_desert_num.Value);
             double time = decimal.ToDouble(numericUpDown_desert_time.Value);
             robot1.AddQ(n, time);
+            DisplayListView();
+        }
+        /// <summary>
+        /// 添加PCR开盖按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button33_Click(object sender, EventArgs e)
+        {
+            robot1.AddPCR(true);
+            DisplayListView();
+
+        }
+        /// <summary>
+        /// 添加PCR合盖按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button34_Click(object sender, EventArgs e)
+        {
+            robot1.AddPCR(false);
             DisplayListView();
         }
         /// <summary>
@@ -629,6 +675,33 @@ namespace 机械臂控制软件
             robot1.ClawOperate(0);
         }
         /// <summary>
+        /// 打孔器加样按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button_hole_operate_Click(object sender, EventArgs e)
+        {
+            robot1.HoleOperate();
+        }
+        /// <summary>
+        /// PCR开盖按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button31_Click(object sender, EventArgs e)
+        {
+            robot1.PcrOperate(true);
+        }
+        /// <summary>
+        /// PCR合盖按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button32_Click(object sender, EventArgs e)
+        {
+            robot1.PcrOperate(false);
+        }
+        /// <summary>
         /// 显示仿真
         /// </summary>
         private void Display()
@@ -898,6 +971,19 @@ namespace 机械臂控制软件
                     }
                     this.listView1.Items.Add(p);
                 }
+                else if ((int)(robot1.StepWork[i]) == 5)
+                {
+                    p.Text = i.ToString();
+                    if (q[0] == 1)
+                    {
+                        p.SubItems.Add("开盖操作");
+                    }
+                    else
+                    {
+                        p.SubItems.Add("合盖操作");
+                    }
+                    this.listView1.Items.Add(p);
+                }
             }
 
             this.listView1.EndUpdate();
@@ -981,6 +1067,19 @@ namespace 机械臂控制软件
                     }
                     this.listView1.Items.Add(p);
                 }
+                else if ((int)(robot1.StepWork[i]) == 5)
+                {
+                    p.Text = i.ToString();
+                    if (q[0] == 1)
+                    {
+                        p.SubItems.Add("开盖操作");
+                    }
+                    else
+                    {
+                        p.SubItems.Add("合盖操作");
+                    }
+                    this.listView1.Items.Add(p);
+                }
             }
             this.listView1.EndUpdate();
             if(step>=0)
@@ -998,7 +1097,36 @@ namespace 机械臂控制软件
             double angle_vel = decimal.ToDouble(numericUpDown_anglevel.Value);
             robot1.default_vel = robot1.TransAngleToArc(angle_vel);
         }
-  
+        /// <summary>
+        /// 开启端口按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button35_Click(object sender, EventArgs e)
+        {
+            if (button35.Text == "开启端口")
+            {
+                ms.DatastoreChanged += DatastoreChangedManage;//数据接收事件关联
+                ms.StartListen();
+                button35.Text = "关闭端口";
+            }
+            else
+            {
+                ms.StopListen();
+                button35.Text = "开启端口";
+            }
+            
+            
+        }
+        /// <summary>
+        /// 删除按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button36_Click(object sender, EventArgs e)
+        {
+            robot1.DeleteQ(1);
+        }
     }
     /// <summary>
     /// 改进listview类

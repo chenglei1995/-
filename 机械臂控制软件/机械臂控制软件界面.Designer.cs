@@ -144,6 +144,9 @@
             this.button_claw_open = new System.Windows.Forms.Button();
             this.tabPage_hole = new System.Windows.Forms.TabPage();
             this.button_hole_operate = new System.Windows.Forms.Button();
+            this.tabPage_PCR = new System.Windows.Forms.TabPage();
+            this.button32 = new System.Windows.Forms.Button();
+            this.button31 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
@@ -161,6 +164,9 @@
             this.button_cycle_stop = new System.Windows.Forms.Button();
             this.button10 = new System.Windows.Forms.Button();
             this.groupBox_teach = new System.Windows.Forms.GroupBox();
+            this.button36 = new System.Windows.Forms.Button();
+            this.button34 = new System.Windows.Forms.Button();
+            this.button33 = new System.Windows.Forms.Button();
             this.groupBox_GoRun = new System.Windows.Forms.GroupBox();
             this.label23 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
@@ -180,6 +186,7 @@
             this.label42 = new System.Windows.Forms.Label();
             this.button30 = new System.Windows.Forms.Button();
             this.textBox_file_read = new System.Windows.Forms.TextBox();
+            this.button35 = new System.Windows.Forms.Button();
             this.tabControl_control_robot.SuspendLayout();
             this.TabPages_pose.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_anglevel)).BeginInit();
@@ -221,6 +228,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_pumpmaxvel)).BeginInit();
             this.tabPage_claw.SuspendLayout();
             this.tabPage_hole.SuspendLayout();
+            this.tabPage_PCR.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_addtime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_addvolume)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_cycle_times)).BeginInit();
@@ -1403,7 +1411,8 @@
             this.tabControl_robot_operation.Controls.Add(this.tabPage_pump);
             this.tabControl_robot_operation.Controls.Add(this.tabPage_claw);
             this.tabControl_robot_operation.Controls.Add(this.tabPage_hole);
-            this.tabControl_robot_operation.Location = new System.Drawing.Point(518, 41);
+            this.tabControl_robot_operation.Controls.Add(this.tabPage_PCR);
+            this.tabControl_robot_operation.Location = new System.Drawing.Point(518, 40);
             this.tabControl_robot_operation.Name = "tabControl_robot_operation";
             this.tabControl_robot_operation.SelectedIndex = 0;
             this.tabControl_robot_operation.Size = new System.Drawing.Size(257, 205);
@@ -1662,6 +1671,38 @@
             this.button_hole_operate.TabIndex = 0;
             this.button_hole_operate.Text = "加样";
             this.button_hole_operate.UseVisualStyleBackColor = true;
+            this.button_hole_operate.Click += new System.EventHandler(this.button_hole_operate_Click);
+            // 
+            // tabPage_PCR
+            // 
+            this.tabPage_PCR.Controls.Add(this.button32);
+            this.tabPage_PCR.Controls.Add(this.button31);
+            this.tabPage_PCR.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_PCR.Name = "tabPage_PCR";
+            this.tabPage_PCR.Size = new System.Drawing.Size(249, 179);
+            this.tabPage_PCR.TabIndex = 3;
+            this.tabPage_PCR.Text = "PCR开合盖";
+            this.tabPage_PCR.UseVisualStyleBackColor = true;
+            // 
+            // button32
+            // 
+            this.button32.Location = new System.Drawing.Point(153, 36);
+            this.button32.Name = "button32";
+            this.button32.Size = new System.Drawing.Size(75, 23);
+            this.button32.TabIndex = 1;
+            this.button32.Text = "合盖";
+            this.button32.UseVisualStyleBackColor = true;
+            this.button32.Click += new System.EventHandler(this.button32_Click);
+            // 
+            // button31
+            // 
+            this.button31.Location = new System.Drawing.Point(33, 36);
+            this.button31.Name = "button31";
+            this.button31.Size = new System.Drawing.Size(75, 23);
+            this.button31.TabIndex = 0;
+            this.button31.Text = "开盖";
+            this.button31.UseVisualStyleBackColor = true;
+            this.button31.Click += new System.EventHandler(this.button31_Click);
             // 
             // button1
             // 
@@ -1780,7 +1821,7 @@
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(87, 143);
+            this.button9.Location = new System.Drawing.Point(8, 143);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(75, 23);
             this.button9.TabIndex = 21;
@@ -1841,6 +1882,9 @@
             // 
             // groupBox_teach
             // 
+            this.groupBox_teach.Controls.Add(this.button36);
+            this.groupBox_teach.Controls.Add(this.button34);
+            this.groupBox_teach.Controls.Add(this.button33);
             this.groupBox_teach.Controls.Add(this.numericUpDown_addtime);
             this.groupBox_teach.Controls.Add(this.button1);
             this.groupBox_teach.Controls.Add(this.numericUpDown_addvolume);
@@ -1862,6 +1906,36 @@
             this.groupBox_teach.TabIndex = 27;
             this.groupBox_teach.TabStop = false;
             this.groupBox_teach.Text = "示教";
+            // 
+            // button36
+            // 
+            this.button36.Location = new System.Drawing.Point(168, 56);
+            this.button36.Name = "button36";
+            this.button36.Size = new System.Drawing.Size(75, 23);
+            this.button36.TabIndex = 29;
+            this.button36.Text = "删除";
+            this.button36.UseVisualStyleBackColor = true;
+            this.button36.Click += new System.EventHandler(this.button36_Click);
+            // 
+            // button34
+            // 
+            this.button34.Location = new System.Drawing.Point(168, 143);
+            this.button34.Name = "button34";
+            this.button34.Size = new System.Drawing.Size(75, 23);
+            this.button34.TabIndex = 28;
+            this.button34.Text = "PCR合盖";
+            this.button34.UseVisualStyleBackColor = true;
+            this.button34.Click += new System.EventHandler(this.button34_Click);
+            // 
+            // button33
+            // 
+            this.button33.Location = new System.Drawing.Point(86, 143);
+            this.button33.Name = "button33";
+            this.button33.Size = new System.Drawing.Size(75, 23);
+            this.button33.TabIndex = 27;
+            this.button33.Text = "PCR开盖";
+            this.button33.UseVisualStyleBackColor = true;
+            this.button33.Click += new System.EventHandler(this.button33_Click);
             // 
             // groupBox_GoRun
             // 
@@ -2050,11 +2124,22 @@
             this.textBox_file_read.Size = new System.Drawing.Size(109, 21);
             this.textBox_file_read.TabIndex = 47;
             // 
+            // button35
+            // 
+            this.button35.Location = new System.Drawing.Point(542, 10);
+            this.button35.Name = "button35";
+            this.button35.Size = new System.Drawing.Size(75, 23);
+            this.button35.TabIndex = 48;
+            this.button35.Text = "开启端口";
+            this.button35.UseVisualStyleBackColor = true;
+            this.button35.Click += new System.EventHandler(this.button35_Click);
+            // 
             // 机械臂控制软件界面
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 460);
+            this.Controls.Add(this.button35);
             this.Controls.Add(this.textBox_file_read);
             this.Controls.Add(this.button30);
             this.Controls.Add(this.label42);
@@ -2072,7 +2157,7 @@
             this.MaximizeBox = false;
             this.Name = "机械臂控制软件界面";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Text = "机械臂控制软件";
+            this.Text = "机械臂控制软件 IP设为192.168.0.3";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.机械臂控制软件界面_FormClosed);
             this.tabControl_control_robot.ResumeLayout(false);
             this.TabPages_pose.ResumeLayout(false);
@@ -2119,6 +2204,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_pumpmaxvel)).EndInit();
             this.tabPage_claw.ResumeLayout(false);
             this.tabPage_hole.ResumeLayout(false);
+            this.tabPage_PCR.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_addtime)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_addvolume)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_cycle_times)).EndInit();
@@ -2286,6 +2372,13 @@
         private System.Windows.Forms.TextBox textBox_file_read;
         private System.Windows.Forms.NumericUpDown numericUpDown_anglevel;
         private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.TabPage tabPage_PCR;
+        private System.Windows.Forms.Button button32;
+        private System.Windows.Forms.Button button31;
+        private System.Windows.Forms.Button button34;
+        private System.Windows.Forms.Button button33;
+        private System.Windows.Forms.Button button35;
+        private System.Windows.Forms.Button button36;
     }
 }
 

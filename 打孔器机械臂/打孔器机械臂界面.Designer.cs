@@ -151,6 +151,8 @@
             this.textBox_file_read = new System.Windows.Forms.TextBox();
             this.userControl11 = new 控件.UserControl1();
             this.timer_Hole = new System.Windows.Forms.Timer(this.components);
+            this.directoryEntry1 = new System.DirectoryServices.DirectoryEntry();
+            this.button1 = new System.Windows.Forms.Button();
             this.tabControl_control_robot.SuspendLayout();
             this.TabPages_pose.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_anglevel)).BeginInit();
@@ -1314,7 +1316,7 @@
             // 
             // button_hole_operate
             // 
-            this.button_hole_operate.Location = new System.Drawing.Point(605, 115);
+            this.button_hole_operate.Location = new System.Drawing.Point(546, 10);
             this.button_hole_operate.Name = "button_hole_operate";
             this.button_hole_operate.Size = new System.Drawing.Size(75, 23);
             this.button_hole_operate.TabIndex = 0;
@@ -1412,7 +1414,7 @@
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 23);
             this.button3.TabIndex = 26;
-            this.button3.Text = "添加完成";
+            this.button3.Text = "轨迹规划";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
@@ -1632,11 +1634,22 @@
             this.timer_Hole.Interval = 1;
             this.timer_Hole.Tick += new System.EventHandler(this.timer_Hole_Tick);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(569, 107);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 49;
+            this.button1.Text = "开启生产线";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // 打孔器机械臂界面
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(755, 460);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.userControl11);
             this.Controls.Add(this.button_hole_operate);
@@ -1653,7 +1666,7 @@
             this.MaximizeBox = false;
             this.Name = "打孔器机械臂界面";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Text = " ";
+            this.Text = " 打孔器机械臂  IP设为192.168.0.1";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.机械臂控制软件界面_FormClosed);
             this.tabControl_control_robot.ResumeLayout(false);
             this.TabPages_pose.ResumeLayout(false);
@@ -1823,6 +1836,8 @@
         private System.Windows.Forms.Button button4;
         private 控件.UserControl1 userControl11;
         private System.Windows.Forms.Timer timer_Hole;
+        private System.DirectoryServices.DirectoryEntry directoryEntry1;
+        private System.Windows.Forms.Button button1;
     }
 }
 

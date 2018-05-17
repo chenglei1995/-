@@ -1323,8 +1323,7 @@ namespace Modbus
     public abstract class ModbusSlave : ModbusBase
     {
        
-        public delegate void DatastoreHandler();
-        public event DatastoreHandler DatastoreChanged;
+        public event EventHandler<DatastoreChangedEventArgs> DatastoreChanged;
         #region Global variables
 
         /// <summary>
@@ -1974,10 +1973,10 @@ namespace Modbus
                          modbus_db.Single(x => x.UnitID == unit_id).Coils[sa] = cv;
                          if (DatastoreChanged != null)
                          {
-                            DatastoreChanged();//写入单个线圈
+                            DatastoreChanged(this,new DatastoreChangedEventArgs(sa,cv));//写入单个线圈
                           } 
                      }
-                    catch(Exception e)
+                    catch
                      {
                          BuildExceptionMessage(send_buffer, mdbcode, Errors.EXCEPTION_SLAVE_DEVICE_FAILURE);
                          break;
@@ -2017,7 +2016,7 @@ namespace Modbus
                         if (DatastoreChanged != null)
                         {
 
-                            DatastoreChanged();//写入单个寄存器
+                            DatastoreChanged(this,new DatastoreChangedEventArgs(sa,val));//写入单个寄存器
                         }
                     }
                     catch
@@ -2066,7 +2065,7 @@ namespace Modbus
                         {
                             coilsargs.CoilsChanged.Add((ushort)(sa + i), modbus_db.Single(x => x.UnitID == unit_id).Coils[sa + i]);
                         }
-                        DatastoreChanged();
+                        DatastoreChanged(this,coilsargs);
                     }
                     catch
                     {
@@ -2110,7 +2109,7 @@ namespace Modbus
                             modbus_db.Single(x => x.UnitID == unit_id).HoldingRegisters[sa + (ii / 2)] = ToUInt16(receive_buffer.ToArray(), 6 + ii);
                             registersargs.RegistersChanged.Add((ushort)(sa + (ii / 2)), ToUInt16(receive_buffer.ToArray(), 6 + ii));
                         }
-                        DatastoreChanged();
+                        DatastoreChanged(this,registersargs);
                             
                     }
                     catch
@@ -2200,7 +2199,7 @@ namespace Modbus
                             modbus_db.Single(x => x.UnitID == unit_id).HoldingRegisters[sa1 + (ii / 2)] = ToUInt16(receive_buffer.ToArray(), 10 + ii);
                             registerargs.RegistersChanged.Add((ushort)(sa1 + (ii / 2)), ToUInt16(receive_buffer.ToArray(), 10 + ii));
                         }
-                       // DatastoreChanged(this, registerargs);  
+                       DatastoreChanged(this, registerargs);  
                     }
                     catch
                     {

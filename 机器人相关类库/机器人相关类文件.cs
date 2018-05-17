@@ -922,14 +922,14 @@ namespace RobotClassLib
         internal ArrayList qdd = new ArrayList();//加速度集合，元素为1X6的double向量
         internal ArrayList vel_vector = new ArrayList();//机械臂插补速度，保留
         public double default_vel = 0.4;//默认速度rad/s
-        internal ArrayList stepwork = new ArrayList();//每一步的工作集合，元素为int量，0运动，1延时，2泵，3打孔，4机械爪
+        internal ArrayList stepwork = new ArrayList();//每一步的工作集合，元素为int量，0运动，1延时，2泵，3打孔，4机械爪,5PCR开合盖
         internal int step = -1;//表示正在向q[step]位置移动
         internal int substep = -1;//细分step
         internal ArrayList stepnum = new ArrayList();//每一步细分集合，元素为int量
         private bool pumpenable = false;//泵是否激活
         private bool holeenable = false;//打孔器是否激活
         private bool clawenable = false;//机械抓是否激活
-        private double equivx = 10000 * 50 / (2*PI), equivy = 10000 * 51 /(2*PI), equivz = 25600 * 51 / (2*PI), equiva = 25600 * 50 /(2*PI), equivb = 25600 * 50 / (2*PI), equivc = 25600 * 50 / (2*PI);//X、Y、Z轴脉冲当量
+        protected double equivx = 10000 * 50 / (2*PI), equivy = 10000 * 51 /(2*PI), equivz = 25600 * 51 / (2*PI), equiva = 25600 * 50 /(2*PI), equivb = 25600 * 50 / (2*PI), equivc = 25600 * 50 / (2*PI);//X、Y、Z轴脉冲当量
         internal ushort axisx = 0;//各轴标号
         internal ushort axisy = 1;
         internal ushort axisz = 2;
@@ -940,12 +940,12 @@ namespace RobotClassLib
         private byte[] readdate = new byte[8];//
         private string portname ;//泵连接的串口名
         private int bitrate = 0;//泵连接串口的波特率
-        private double xmax_vel = 0.1 * PI;//各轴最大回零速度
-        private double ymax_vel = 0.05 * PI;
-        private double zmax_vel = 0.03 * PI;
-        private double amax_vel = 0.2 * PI;
-        private double bmax_vel = 0.2 * PI;
-        private double cmax_vel = 0.2* PI;
+        protected double xmax_vel = 0.1 * PI;//各轴最大回零速度
+        protected double ymax_vel = 0.05 * PI;
+        protected double zmax_vel = 0.03 * PI;
+        protected double amax_vel = 0.2 * PI;
+        protected double bmax_vel = 0.2 * PI;
+        protected double cmax_vel = 0.2* PI;
         #endregion
         #region 属性
         /// <summary>
@@ -1078,7 +1078,7 @@ namespace RobotClassLib
         /// <summary>
         /// 机器人初始化函数，包括回零，并且运动到初始状态
         /// </summary>
-        public void Initialize()
+        public   void Initialize()
         {
             InitralConfig();
             //设置脉冲当量
@@ -1120,22 +1120,22 @@ namespace RobotClassLib
         /// axis轴回零
         /// </summary>
         /// <param name="axis"></param>
-        private void GoHome(ushort axis)
+        protected virtual void GoHome(ushort axis)
         {
-           if(ifmove==true)
+            if (ifmove == true)
             {
                 double x_pos = -PI;//设置机械零点在D—H模型中的对应值
-                double y_pos = 179.25 / 180 * PI;
+                double y_pos = 178.27 / 180 * PI;
                 double z_pos = -PI / 2;
-                double a_pos = -(double)156.62 / 180 * PI;
-                double b_pos = -(double)115.02 / 180 * PI;
-                double c_pos = (double)129.99 / 180 * PI;
+                double a_pos = -(double)160.34 / 180 * PI;
+                double b_pos = -(double)118.74 / 180 * PI;
+                double c_pos = (double)126.5 / 180 * PI;
                 double pos = 0;
                 ushort homemode = 1;//回零模式
                 ushort myhome_dir = 0;//回零方向
                 ushort vel_mode = 1;//回零速度模式，1为高速回零
                 double max_vel = 0;
-                if (axis == 1 || axis == 5)
+                if (axis == axisy || axis == axisc)
                 {
                     myhome_dir = 1;
                 }
@@ -1190,7 +1190,7 @@ namespace RobotClassLib
         /// axis轴回到初始位置点
         /// </summary>
         /// <param name="axis"></param>
-        private void GoInitialPosition(ushort axis)
+        protected void GoInitialPosition(ushort axis)
         {
             if(ifmove==true)
             {
@@ -1199,7 +1199,7 @@ namespace RobotClassLib
                 double z_move = 0;
                 double a_move = 0;
                 double b_move = 0;
-                double c_move = 0;
+                double c_move = -PI/2;
                 double move = 0;
                 double max_vel = 0;
 
@@ -1414,6 +1414,30 @@ namespace RobotClassLib
             vel_vector.Add((double)0);
         }
         /// <summary>
+        /// 添加PCR动作
+        /// </summary>
+        /// <param name="IFOPEN"></param>
+        public void AddPCR(bool IFOPEN)
+        {
+            double[] qd1 = new double[6];//先初始化为零
+            double[] qdd1 = new double[6];
+            double[] operation = new double[6];
+            if (IFOPEN == true)
+            {
+                operation = new double[6] { 1, 0, 0, 0, 0, 0 };
+            }
+            else
+            {
+                operation = new double[6] { 0, 0, 0, 0, 0, 0 };
+            }
+            q.Add(operation);
+            qd.Add(qd1);
+            qdd.Add(qdd1);
+            stepwork.Add(5);
+            stepnum.Add(1);
+            vel_vector.Add((double)0);
+        }
+        /// <summary>
         /// 删除n个位置、速度、加速度集合的元素
         /// </summary>
         /// <param name="n"></param>
@@ -1533,6 +1557,19 @@ namespace RobotClassLib
                         else
                         {
                             ClawOperate(1);
+                        }
+                        substep = substep + 1;
+                    }
+                    else if((int)stepwork[step]==5)//如果为PCR操作
+                    {
+                        double operation = ((double[])q[substep])[0];
+                        if (operation == 1)
+                        {
+                            PcrOperate(true);
+                        }
+                        else
+                        {
+                            PcrOperate(false);
                         }
                         substep = substep + 1;
                     }
@@ -1667,9 +1704,9 @@ namespace RobotClassLib
                 {
                     ToTrans(ref q2, ref qd2, ref qdd2, q1, VN, N, TIME);
                 }
-                catch
+                catch(Exception ex)
                 {
-                    MessageBox.Show("无法到达，更改距离！", "提示");
+                    MessageBox.Show(ex.ToString()+"无法到达，更改距离！", "提示");
                     return;
                 }
                 for (int i = 0; i < N; i++)
@@ -1696,7 +1733,6 @@ namespace RobotClassLib
                         {
                             Application.DoEvents();
                         }
-
                     }
                 }
             }
@@ -1928,7 +1964,7 @@ namespace RobotClassLib
         /// <summary>
         /// 串口初始化
         /// </summary>
-        private void InitralConfig()
+        protected void InitralConfig()
         {
 
             //查询主机上存在的串口
@@ -2289,6 +2325,22 @@ namespace RobotClassLib
             LTDMC.dmc_write_outbit(card_id, 2, 1);
         }
         /// <summary>
+        /// PCR操作,IO接口为OUT3
+        /// </summary>
+        /// <param name="ifopen">为true表示开盖，false表示合盖</param>
+        public void PcrOperate(bool ifopen)
+        {
+            if(ifopen)
+            {
+                LTDMC.dmc_write_outbit(card_id, 3, 0);
+            }
+            else
+            {
+                LTDMC.dmc_write_outbit(card_id, 3, 1);
+            }
+            
+        }
+        /// <summary>
         /// 将路径为path的文件的数据读取到Robot的类中
         /// </summary>
         /// <param name="PATH"></param>
@@ -2443,6 +2495,7 @@ namespace RobotClassLib
                 return;
             }
         }
+        
     }
     /// <summary>
     /// 打孔器机械臂类
@@ -2612,7 +2665,76 @@ namespace RobotClassLib
             get { return Q.Count != 0; }
         }
         #endregion
+        /// <summary>
+        /// axis轴回零
+        /// </summary>
+        /// <param name="axis"></param>
+        protected override void GoHome(ushort axis)
+        {
+            if (ifmove == true)
+            {
+                double x_pos = -PI;//设置机械零点在D—H模型中的对应值
+                double y_pos = 179.24 / 180 * PI;
+                double z_pos = -PI / 2;
+                double a_pos = -(double)156.62 / 180 * PI;
+                double b_pos = -(double)120 / 180 * PI;
+                double c_pos = (double)129.99 / 180 * PI;
+                double pos = 0;
+                ushort homemode = 1;//回零模式
+                ushort myhome_dir = 0;//回零方向
+                ushort vel_mode = 1;//回零速度模式，1为高速回零
+                double max_vel = 0;
+                if (axis == axisy || axis == axisc)
+                {
+                    myhome_dir = 1;
+                }
+                else
+                {
+                    myhome_dir = 0;
+                }
+                LTDMC.dmc_set_home_pin_logic(card_id, axis, 0, 0);//设置原点信号
+                LTDMC.dmc_set_homemode(card_id, axis, myhome_dir, vel_mode, homemode, 0);//设置脉冲当量
+                if (axis == 0)
+                {
+                    max_vel = xmax_vel;
+                    pos = x_pos;
+                }
+                else if (axis == 1)
+                {
+                    max_vel = ymax_vel;
+                    pos = y_pos;
+                }
+                else if (axis == 2)
+                {
+                    max_vel = zmax_vel;
+                    pos = z_pos;
+                }
+                else if (axis == 3)
+                {
+                    max_vel = amax_vel;
+                    pos = a_pos;
+                }
+                else if (axis == 4)
+                {
+                    max_vel = bmax_vel;
+                    pos = b_pos;
+                }
+                else if (axis == 5)
+                {
+                    max_vel = cmax_vel;
+                    pos = c_pos;
+                }
 
+                LTDMC.dmc_set_profile_unit(card_id, axis, 0, max_vel, 0.1, 0.1, 0);//设置速度
+                LTDMC.dmc_set_s_profile(card_id, axis, 0, 0.05);//设置S段时间
+                LTDMC.dmc_home_move(card_id, axis);//回零运动
+                while (LTDMC.dmc_check_done(card_id, axis) == 0)
+                {
+                    Application.DoEvents();//待定，不做任何事
+                }
+                LTDMC.dmc_set_position_unit(card_id, axis, pos);//设置当前位置
+            }
+        }
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -3032,7 +3154,20 @@ namespace RobotClassLib
                         }
                         substep = substep + 1;
                     }
-                    if (ifmove == false)//如果检测到运动标志位为false
+                else if ((int)stepwork[step] == 5)//如果为PCR操作
+                {
+                    double operation = ((double[])q[substep])[0];
+                    if (operation == 1)
+                    {
+                        PcrOperate(true);
+                    }
+                    else
+                    {
+                        PcrOperate(false);
+                    }
+                    substep = substep + 1;
+                }
+                if (ifmove == false)//如果检测到运动标志位为false
                     {
                         return;
                     }
@@ -3228,7 +3363,7 @@ namespace RobotClassLib
         private bool holekeypointfinished = false;//孔位关键点是否标定完成
         private bool holepointfinished = false;//空位点是否标定完成
         public delegate void PropertyChangedHander();
-        public event PropertyChangedHander PropertyChanged;
+        public event PropertyChangedHander PropertyChanged;//属性改变事件
         private ArrayList arrayhole = new ArrayList();//存储用于holestep和step转换的数组
 
         #region property
@@ -3398,7 +3533,76 @@ namespace RobotClassLib
             set { pumpvolume = value; }
         }
         #endregion
+        /// <summary>
+        /// axis轴回零
+        /// </summary>
+        /// <param name="axis"></param>
+        protected override void GoHome(ushort axis)
+        {
+            if (ifmove == true)
+            {
+                double x_pos = -PI;//设置机械零点在D—H模型中的对应值
+                double y_pos = 178.27 / 180 * PI;
+                double z_pos = -PI / 2;
+                double a_pos = -(double)157.82 / 180 * PI;
+                double b_pos = -(double)121.03 / 180 * PI;
+                double c_pos = (double)129.99 / 180 * PI;
+                double pos = 0;
+                ushort homemode = 1;//回零模式
+                ushort myhome_dir = 0;//回零方向
+                ushort vel_mode = 1;//回零速度模式，1为高速回零
+                double max_vel = 0;
+                if (axis == axisy || axis == axisc)
+                {
+                    myhome_dir = 1;
+                }
+                else
+                {
+                    myhome_dir = 0;
+                }
+                LTDMC.dmc_set_home_pin_logic(card_id, axis, 0, 0);//设置原点信号
+                LTDMC.dmc_set_homemode(card_id, axis, myhome_dir, vel_mode, homemode, 0);//设置脉冲当量
+                if (axis == 0)
+                {
+                    max_vel = xmax_vel;
+                    pos = x_pos;
+                }
+                else if (axis == 1)
+                {
+                    max_vel = ymax_vel;
+                    pos = y_pos;
+                }
+                else if (axis == 2)
+                {
+                    max_vel = zmax_vel;
+                    pos = z_pos;
+                }
+                else if (axis == 3)
+                {
+                    max_vel = amax_vel;
+                    pos = a_pos;
+                }
+                else if (axis == 4)
+                {
+                    max_vel = bmax_vel;
+                    pos = b_pos;
+                }
+                else if (axis == 5)
+                {
+                    max_vel = cmax_vel;
+                    pos = c_pos;
+                }
 
+                LTDMC.dmc_set_profile_unit(card_id, axis, 0, max_vel, 0.1, 0.1, 0);//设置速度
+                LTDMC.dmc_set_s_profile(card_id, axis, 0, 0.05);//设置S段时间
+                LTDMC.dmc_home_move(card_id, axis);//回零运动
+                while (LTDMC.dmc_check_done(card_id, axis) == 0)
+                {
+                    Application.DoEvents();//待定，不做任何事
+                }
+                LTDMC.dmc_set_position_unit(card_id, axis, pos);//设置当前位置
+            }
+        }
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -3705,7 +3909,7 @@ namespace RobotClassLib
             {
                 AddQ((double[])keypoint[0], 1);
                 AddQ((double[])keypoint[1], 1);
-                for (int i = 0; i < 95; i++)
+                for (int i = 0; i < 96; i++)
                 {
                     int k = 0;
                     int w = 0;
@@ -3720,6 +3924,7 @@ namespace RobotClassLib
                         AddDelay(0.5);
                     }
                 }
+
                 AddQ((double[])keypoint[1], 0.5);
                 AddQ((double[])keypoint[0], 1);
             }
@@ -3796,6 +4001,19 @@ namespace RobotClassLib
                     else
                     {
                         ClawOperate(1);
+                    }
+                    substep = substep + 1;
+                }
+                else if ((int)stepwork[step] == 5)//如果为PCR操作
+                {
+                    double operation = ((double[])q[substep])[0];
+                    if (operation == 1)
+                    {
+                        PcrOperate(true);
+                    }
+                    else
+                    {
+                        PcrOperate(false);
                     }
                     substep = substep + 1;
                 }

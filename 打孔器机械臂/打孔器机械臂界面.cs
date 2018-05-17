@@ -16,6 +16,7 @@ using System.Threading;
 using static System.Math;
 using System.IO;
 using System.Runtime.InteropServices;
+using Modbus;
 
 namespace 机械臂控制软件
 {
@@ -412,6 +413,7 @@ namespace 机械臂控制软件
         private void button_cycle_start_Click(object sender, EventArgs e)
         {
                 robot1.Start();
+
         }
         /// <summary>
         /// 停止循环
@@ -1023,14 +1025,38 @@ namespace 机械臂控制软件
                 userControl11.j_Coordinate = j;
             }
         }
-
         /// <summary>
-        /// 速度设置变化
+        /// 开启生产线按钮
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+        private void button1_Click(object sender, EventArgs e)
+        {
+            robot1.Start();
+            ModbusMasterTCP mm = new ModbusMasterTCP("192.168.0.2", 502);
+            mm.Connect();
+            mm.WriteSingleCoil(2, 0, true);
+            while (mm.ReadCoils(2, 0, 1).First())
+            {
+                Application.DoEvents();//待定，空执行
+            }
+            mm.Disconnect();
+            mm = new ModbusMasterTCP("192.168.0.3", 502);
+            mm.Connect();
+            mm.WriteSingleCoil(3, 0, true);
+            while (mm.ReadCoils(3, 0, 1).First())
+            {
+                Application.DoEvents();//待定，空执行
+            }
+            mm.Disconnect();
+        }
+            /// <summary>
+            /// 速度设置变化
+            /// </summary>
+            /// <param name="sender"></param>
+            /// <param name="e"></param>
 
-    }
+        }
     /// <summary>
     /// 改进listview类
     /// </summary>

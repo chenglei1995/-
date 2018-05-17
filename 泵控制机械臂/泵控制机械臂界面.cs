@@ -16,6 +16,9 @@ using System.Threading;
 using static System.Math;
 using System.IO;
 using System.Runtime.InteropServices;
+using Modbus;
+using System.Net;
+using System.Net.Sockets;
 
 namespace 机械臂控制软件
 {
@@ -26,7 +29,9 @@ namespace 机械臂控制软件
         static ushort _cardid = 0;
         PumpRobot robot1 = new PumpRobot(_cardid);
         short board_num = 0;
-        private EventCheckChange checkstep=new EventCheckChange();
+        private EventCheckChange checkstep=new EventCheckChange();//检测step变化
+        static Datastore ds = new Datastore(2);
+        ModbusSlaveTCP ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse("192.168.0.2"), 502);
         /// <summary>
         /// 界面初始化
         /// </summary>
@@ -101,6 +106,17 @@ namespace 机械臂控制软件
             userControl11.Enabled = false;
             //  double[] q0 = new double[6] { PI / 2, PI / 2, 0, 0, 0, 0 };
             //PaintRobot(q0);
+
+        }
+        /// <summary>
+        /// 数据接收事件
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
+        private void DatastoreChangedManage(object source, DatastoreChangedEventArgs e)
+        {
+            robot1.Start();
+            ms.ModbusDB.Single(x => x.UnitID == 2).Coils[0] = false;//执行完后将Coils[0]置为false
         }
         /// <summary>
         /// 属性改变事件处理函数
@@ -1144,6 +1160,26 @@ namespace 机械臂控制软件
         {
             double volume = Convert.ToDouble(numericUpDown_pumpvolume.Value);
             robot1.PumpVolume = volume;
+        }
+        /// <summary>
+        /// 开启端口按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (button1.Text == "开启端口")
+            {
+                ms.DatastoreChanged += DatastoreChangedManage;//数据接收事件关联
+                ms.StartListen();
+                button1.Text = "关闭端口";
+            }
+            else
+            {
+                ms.StopListen();
+                button1.Text = "开启端口";
+            }
+            
         }
 
         /// <summary>
