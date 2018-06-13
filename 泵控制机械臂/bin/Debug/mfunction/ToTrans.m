@@ -23,7 +23,7 @@ pz=Vn(3);
 Trans=[1,0,0,px;0,1,0,py;0,0,1,pz;0,0,0,1];
 T=Trans*T;
 Qr=ikine(b123,T,Q0);
-Qr=Find(Qr);
+%Qr=Find(Qr);
 Time=linspace(0,TIME,N);
 [Q,QD,QDD]=jtraj(Q0,Qr,Time);
 

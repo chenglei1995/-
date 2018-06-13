@@ -850,6 +850,7 @@ namespace 机械臂控制软件
         /// <param name="e"></param>
         private void timer1_Tick(object sender, EventArgs e)
         {
+            label45.Text = robot1.Step.ToString();
             checkstep.Temp = robot1.Step;
             if (board_num > 0)
             {
@@ -899,7 +900,7 @@ namespace 机械臂控制软件
         {
             this.listView1.Items.Clear();
             this.listView1.BeginUpdate();
-            int step = robot1.Step;
+            int step = -1;
             int substep = robot1.TransSub(step);
             int count = robot1.StepWork.Count;
             int subi = 0;
@@ -1127,6 +1128,14 @@ namespace 机械臂控制软件
         {
             robot1.DeleteQ(1);
         }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            double percentage = decimal.ToDouble(numericUpDown1.Value);
+            LTDMC.dmc_conti_change_speed_ratio(robot1.Card_ID, 0, percentage);
+        }
+
+      
     }
     /// <summary>
     /// 改进listview类

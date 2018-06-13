@@ -13,3 +13,8 @@ D:\程磊\华大基因\黑贝项目\Modbus\bin\Debug\Modbus.pdb
 D:\程磊\华大基因\黑贝项目\Modbus\obj\Debug\Modbus.csprojResolveAssemblyReference.cache
 D:\程磊\华大基因\黑贝项目\Modbus\obj\Debug\Modbus.dll
 D:\程磊\华大基因\黑贝项目\Modbus\obj\Debug\Modbus.pdb
+C:\Users\TD\Desktop\黑贝项目\Modbus\bin\Debug\Modbus.dll
+C:\Users\TD\Desktop\黑贝项目\Modbus\bin\Debug\Modbus.pdb
+C:\Users\TD\Desktop\黑贝项目\Modbus\obj\Debug\Modbus.csprojResolveAssemblyReference.cache
+C:\Users\TD\Desktop\黑贝项目\Modbus\obj\Debug\Modbus.dll
+C:\Users\TD\Desktop\黑贝项目\Modbus\obj\Debug\Modbus.pdb

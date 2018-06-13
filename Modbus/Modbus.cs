@@ -18,6 +18,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace Modbus
 {
@@ -248,7 +249,7 @@ namespace Modbus
         /// <summary>
         /// Default rx timeout in milliseconds
         /// </summary>
-        const int DEFAULT_RX_TIMEOUT = 6000;
+        const int DEFAULT_RX_TIMEOUT = 600000000;
 
         /// <summary>
         /// Length in bytes of MBAP header        
@@ -956,8 +957,11 @@ namespace Modbus
             send_buffer.AddRange(GetBytes(start_address));
             send_buffer.AddRange(GetBytes(len));
             Query(unit_id, msg_len);
+            //MessageBox.Show(Errors.NO_ERROR.ToString());
             if (error != Errors.NO_ERROR)
+            {
                 return null;
+            } 
             BitArray ba = new BitArray(receive_buffer.GetRange(2, receive_buffer.Count - 2).ToArray());
             bool[] ret = new bool[ba.Count];
             ba.CopyTo(ret, 0);

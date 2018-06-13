@@ -187,6 +187,9 @@
             this.button30 = new System.Windows.Forms.Button();
             this.textBox_file_read = new System.Windows.Forms.TextBox();
             this.button35 = new System.Windows.Forms.Button();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.label44 = new System.Windows.Forms.Label();
+            this.label45 = new System.Windows.Forms.Label();
             this.tabControl_control_robot.SuspendLayout();
             this.TabPages_pose.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_anglevel)).BeginInit();
@@ -235,6 +238,7 @@
             this.groupBox_teach.SuspendLayout();
             this.groupBox_GoRun.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl_control_robot
@@ -1817,6 +1821,7 @@
             // 
             // timer1
             // 
+            this.timer1.Interval = 10;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // button9
@@ -2134,11 +2139,56 @@
             this.button35.UseVisualStyleBackColor = true;
             this.button35.Click += new System.EventHandler(this.button35_Click);
             // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.DecimalPlaces = 2;
+            this.numericUpDown1.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.numericUpDown1.Location = new System.Drawing.Point(706, 11);
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(66, 21);
+            this.numericUpDown1.TabIndex = 49;
+            this.numericUpDown1.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(637, 16);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(65, 12);
+            this.label44.TabIndex = 50;
+            this.label44.Text = "在线调速：";
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(706, 438);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(47, 12);
+            this.label45.TabIndex = 51;
+            this.label45.Text = "label45";
+            // 
             // 机械臂控制软件界面
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 460);
+            this.Controls.Add(this.label45);
+            this.Controls.Add(this.label44);
+            this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.button35);
             this.Controls.Add(this.textBox_file_read);
             this.Controls.Add(this.button30);
@@ -2214,6 +2264,7 @@
             this.groupBox_GoRun.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2379,6 +2430,9 @@
         private System.Windows.Forms.Button button33;
         private System.Windows.Forms.Button button35;
         private System.Windows.Forms.Button button36;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.Label label45;
     }
 }
 

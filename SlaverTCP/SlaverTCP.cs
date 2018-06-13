@@ -31,9 +31,9 @@ namespace SlaverTCP
             if(button1.Text== "开启")
             {
                 // Created datastore for unit ID 1
-            //    ds = new Datastore(byte.Parse(textBox5.Text));
+              ds = new Datastore(byte.Parse(textBox5.Text));
                 // Crete instance of modbus serial RTU (replace COMx with a free serial port - ex. COM5)
-               // ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse(textBox4.Text), 502);
+               ms = new ModbusSlaveTCP(new Datastore[] { ds }, IPAddress.Parse(textBox4.Text), 502);
                 ms.DatastoreChanged += DatastoreChangedManage;
                // Start listen
                ms.StartListen();
@@ -62,7 +62,7 @@ namespace SlaverTCP
             if(button1.Text == "关闭")
             {
                 Thread.Sleep(100);
-               // textBox1.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).HoldingRegisters[4].ToString("D5");
+                //textBox1.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).HoldingRegisters[4].ToString("D5");
                 //textBox2.Text = ms.ModbusDB.Single(x => x.UnitID == byte.Parse(textBox5.Text)).Coils[2].ToString();
             }
         }

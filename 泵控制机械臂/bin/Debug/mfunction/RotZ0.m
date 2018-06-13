@@ -29,7 +29,7 @@ tran=rotz(ANGLE);
 T=tran*R;
 T1=Trans*T;
 Qr=ikine(b123,T1,Q0);
-Qr=Find(Qr);
+%Qr=Find(Qr);
 Time=linspace(0,TIME,N);
 [Q,QD,QDD]=jtraj(Q0,Qr,Time);
 

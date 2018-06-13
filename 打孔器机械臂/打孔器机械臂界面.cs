@@ -1032,31 +1032,35 @@ namespace 机械臂控制软件
         /// <param name="e"></param>
         private void button1_Click(object sender, EventArgs e)
         {
-            robot1.Start();
-            ModbusMasterTCP mm = new ModbusMasterTCP("192.168.0.2", 502);
-            mm.Connect();
-            mm.WriteSingleCoil(2, 0, true);
-            while (mm.ReadCoils(2, 0, 1).First())
+           
+                robot1.Start();
+                ModbusMasterTCP mm = new ModbusMasterTCP("192.168.0.2", 502);
+                mm.Connect();
+                mm.WriteSingleCoil(2, 0, true);
+         try
             {
-                Application.DoEvents();//待定，空执行
+                while (mm.ReadCoils(2, 0, 1).First())
+                {
+                    //Application.DoEvents();//待定，空执行
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
             }
             mm.Disconnect();
             mm = new ModbusMasterTCP("192.168.0.3", 502);
             mm.Connect();
-            mm.WriteSingleCoil(3, 0, true);
-            while (mm.ReadCoils(3, 0, 1).First())
-            {
-                Application.DoEvents();//待定，空执行
-            }
-            mm.Disconnect();
+            mm.WriteSingleCoil((byte)3, 0, true);
+            /*while (mm.ReadCoils(3, 0, 1).First())
+                {
+                    //Application.DoEvents();//待定，空执行
+                }*/
+                mm.Disconnect();
+            
+            
         }
-            /// <summary>
-            /// 速度设置变化
-            /// </summary>
-            /// <param name="sender"></param>
-            /// <param name="e"></param>
-
-        }
+    }
     /// <summary>
     /// 改进listview类
     /// </summary>

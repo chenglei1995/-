@@ -33,3 +33,14 @@ D:\程磊\华大基因\黑贝项目\MasterTCP\obj\Debug\MasterTCP.csprojResolveA
 D:\程磊\华大基因\黑贝项目\MasterTCP\obj\Debug\MasterTCP.MasterTCP.resources
 D:\程磊\华大基因\黑贝项目\MasterTCP\obj\Debug\MasterTCP.Properties.Resources.resources
 D:\程磊\华大基因\黑贝项目\MasterTCP\obj\Debug\MasterTCP.csproj.GenerateResource.Cache
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\bin\Debug\MasterTCP.exe.config
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\obj\Debug\MasterTCP.exe
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\obj\Debug\MasterTCP.pdb
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\bin\Debug\MasterTCP.exe
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\bin\Debug\MasterTCP.pdb
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\bin\Debug\Modbus.dll
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\bin\Debug\Modbus.pdb
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\obj\Debug\MasterTCP.csprojResolveAssemblyReference.cache
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\obj\Debug\MasterTCP.MasterTCP.resources
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\obj\Debug\MasterTCP.Properties.Resources.resources
+C:\Users\TD\Desktop\黑贝项目\MasterTCP\obj\Debug\MasterTCP.csproj.GenerateResource.Cache

@@ -44,7 +44,7 @@ T16=tran*R16;
 T16=Trans*T16;
 T=T10'*T16;
 Qr=ikine(b123,T,Q0);
-Qr=Find(Qr);
+%Qr=Find(Qr);
 Time=linspace(0,TIME,N);
 [Q,QD,QDD]=jtraj(Q0,Qr,Time);
 

@@ -12,3 +12,10 @@ C:\Users\TD\Desktop\黑贝项目\黑贝项目\机器人相关类库\obj\Debug\In
 C:\Users\TD\Desktop\黑贝项目\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.csproj.ResolveComReference.cache
 C:\Users\TD\Desktop\黑贝项目\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.dll
 C:\Users\TD\Desktop\黑贝项目\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.pdb
+C:\Users\TD\Desktop\黑贝项目\机器人相关类库\bin\Debug\机器人相关类库.dll
+C:\Users\TD\Desktop\黑贝项目\机器人相关类库\bin\Debug\机器人相关类库.pdb
+C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.csprojResolveAssemblyReference.cache
+C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\Interop.MLApp.dll
+C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.csproj.ResolveComReference.cache
+C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.dll
+C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.pdb

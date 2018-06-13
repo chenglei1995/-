@@ -31,3 +31,14 @@ D:\程磊\华大基因\黑贝项目\SlaverTCP\bin\Debug\SlaverTCP.exe
 D:\程磊\华大基因\黑贝项目\SlaverTCP\bin\Debug\SlaverTCP.pdb
 D:\程磊\华大基因\黑贝项目\SlaverTCP\bin\Debug\Modbus.dll
 D:\程磊\华大基因\黑贝项目\SlaverTCP\bin\Debug\Modbus.pdb
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\bin\Debug\SlaverTCP.exe.config
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.exe
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.pdb
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\bin\Debug\SlaverTCP.exe
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\bin\Debug\SlaverTCP.pdb
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\bin\Debug\Modbus.dll
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\bin\Debug\Modbus.pdb
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.csprojResolveAssemblyReference.cache
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.SlaverTCP.resources
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.Properties.Resources.resources
+C:\Users\TD\Desktop\黑贝项目\SlaverTCP\obj\Debug\SlaverTCP.csproj.GenerateResource.Cache

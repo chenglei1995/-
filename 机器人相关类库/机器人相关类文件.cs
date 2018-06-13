@@ -490,7 +490,6 @@ namespace RobotClassLib
         /// </summary>
         static public void CloseMatlab()
         {
-
             matlab.Quit();
             matlab = null;
         }
@@ -921,7 +920,7 @@ namespace RobotClassLib
         internal ArrayList qd = new ArrayList();//速度集合，元素为1X6的doulbe向量
         internal ArrayList qdd = new ArrayList();//加速度集合，元素为1X6的double向量
         internal ArrayList vel_vector = new ArrayList();//机械臂插补速度，保留
-        public double default_vel = 0.4;//默认速度rad/s
+        public double default_vel = 0.5;//默认速度rad/s
         internal ArrayList stepwork = new ArrayList();//每一步的工作集合，元素为int量，0运动，1延时，2泵，3打孔，4机械爪,5PCR开合盖
         internal int step = -1;//表示正在向q[step]位置移动
         internal int substep = -1;//细分step
@@ -942,8 +941,8 @@ namespace RobotClassLib
         private int bitrate = 0;//泵连接串口的波特率
         protected double xmax_vel = 0.1 * PI;//各轴最大回零速度
         protected double ymax_vel = 0.05 * PI;
-        protected double zmax_vel = 0.03 * PI;
-        protected double amax_vel = 0.2 * PI;
+        protected double zmax_vel = 0.06 * PI;
+        protected double amax_vel = 0.1 * PI;
         protected double bmax_vel = 0.2 * PI;
         protected double cmax_vel = 0.2* PI;
         #endregion
@@ -1078,7 +1077,7 @@ namespace RobotClassLib
         /// <summary>
         /// 机器人初始化函数，包括回零，并且运动到初始状态
         /// </summary>
-        public   void Initialize()
+        public void Initialize()
         {
             InitralConfig();
             //设置脉冲当量
@@ -1198,8 +1197,8 @@ namespace RobotClassLib
                 double y_move = PI / 2;
                 double z_move = 0;
                 double a_move = 0;
-                double b_move = 0;
-                double c_move = -PI/2;
+                double b_move = -PI / 2;
+                double c_move = 0;
                 double move = 0;
                 double max_vel = 0;
 
@@ -1494,13 +1493,149 @@ namespace RobotClassLib
                 MessageBox.Show("超出范围！", "提示");
                 return;
             }
+            int n = q.Count;
+            LTDMC.dmc_conti_open_list(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 });
+           // LTDMC.dmc_conti_set_lookahead_mode(card_id, 0, 1, 1000, 0, 100);
+           // LTDMC.dmc_conti_set_blend(card_id, 0, 1);
+            int addstep = 0;//如果有泵操作，作为中间变量，存储step值
             if (STEPSTART <= STEPSTOP)
             {
                 for (int k = STEPSTART; k <= STEPSTOP; k++)
                 {
+                    if ((int)stepwork[k] == 0)//如果为运动
+                    {
+                        for (int i = 0; i < (int)stepnum[k]; i++)
+                        {
+                            max_vel = (double)vel_vector[TransSub(k)];
+                            //当出现max_vel为零，而要运动的位置不为零时
+                            if (max_vel != 0)
+                            {
+                                LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                                LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                                LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[TransSub(k)], 1,step);
+                            }
+                        }
+                    }
+                    else if ((int)stepwork[k] == 1)//如果为延时
+                    {
+                        double second = ((double[])q[TransSub(k)])[0];
+                        LTDMC.dmc_conti_delay(card_id, 0, second, 0);
+                    }
+                    else if ((int)stepwork[k] == 2)//如果为泵操作
+                    {
+                        LTDMC.dmc_conti_start_list(card_id, 0);
+                        LTDMC.dmc_conti_close_list(card_id, 0);
+                        while(LTDMC.dmc_conti_remain_space(card_id, 0)!=5000)
+                        {
+                            Application.DoEvents();
+                            step = LTDMC.dmc_conti_read_current_mark(card_id, 0)+addstep;
+                        }
+                        addstep = step+1;
+                        double operation = ((double[])q[TransSub(k)])[0];
+                        double velocity = ((double[])q[TransSub(k)])[1];
+                        double volume = ((double[])q[TransSub(k)])[2];
+                        if (operation == 1)
+                        {
+                            PumpAbsorb((int)velocity, volume);//速度单位为转/min
+                        }
+                        else
+                        {
+                            PumpEject((int)velocity, volume);
+                        }
+                        LTDMC.dmc_conti_open_list(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 });
+                        LTDMC.dmc_conti_set_lookahead_mode(card_id, 0, 1, 1000, 0, 100);
+                        LTDMC.dmc_conti_set_blend(card_id, 0, 1);
+                    }
+                    else if ((int)stepwork[k] == 3)//如果为打孔器操作,2号io口
+                    {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 2, 0, 0.5);
+                    }
+                    else if ((int)stepwork[k] == 4)//如果为机械爪操作
+                    {
+                        double operation = ((double[])q[TransSub(k)])[0];
+                        if (operation == 1)
+                        {
+                            LTDMC.dmc_conti_write_outbit(card_id, 0, 0, 0, 0.5);//0号io口
+                        }
+                        else
+                        {
+                            LTDMC.dmc_conti_write_outbit(card_id, 0, 1, 0, 0.5);//1号io口
+                        }
+                    }
+                    else if ((int)stepwork[k] == 5)//如果为PCR操作
+                    {
+                        double operation = ((double[])q[TransSub(k)])[0];
+                        if (operation == 1)
+                        {
+                           LTDMC.dmc_conti_write_outbit(card_id,0,3,0,0);//张开操作是，3号IO口置为0
+                        }
+                        else
+                        {
+                            LTDMC.dmc_conti_write_outbit(card_id, 0, 3, 1, 0);//闭合操作时，3号IO口置为1
+                        }
+                    }
+                    if (ifmove == false)//如果检测到运动标志位为false
+                    {
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                for (int k = STEPSTART; k > STEPSTOP; k--)
+                {
                     step = k;
-                    int test1 = q.Count;
-                    int test2 = stepwork.Count;
+                    substep = TransSub(step);
+                    if ((int)stepwork[step - 1] == 0)//如果为运动
+                    {
+                        for (int i = 0; i < (int)stepnum[step - 1]; i++)
+                        {
+
+                            max_vel = (double)vel_vector[substep - 1];
+                            //当出现max_vel为零，而要运动的位置不为零时
+                            if (max_vel != 0)
+                            {
+                                LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                                LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                                LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[substep-1], 1, 0);
+                            }
+                            substep = substep - 1;
+                        }
+                    }
+                    else if ((int)stepwork[step - 1] == 1)//如果为延时
+                    {
+                        substep = substep - 1;
+                    }
+                    else if ((int)stepwork[step] == 2)//如果为泵操作
+                    {
+                        substep = substep - 1;
+                    }
+                    else if ((int)stepwork[step] == 3)//如果为打孔器操作
+                    {
+                        substep = substep - 1;
+                    }
+                    else if ((int)stepwork[step] == 4)//如果为机械爪操作
+                    {
+                        substep = substep - 1;
+                    }
+                    if (ifmove == false)//如果检测到运动标志位为false
+                    {
+                        return;
+                    }
+                }
+            }
+            LTDMC.dmc_conti_start_list(card_id, 0);
+            LTDMC.dmc_conti_close_list(card_id, 0);
+            while (LTDMC.dmc_conti_remain_space(card_id, 0) != 5000)
+            {
+                Application.DoEvents();
+                step = LTDMC.dmc_conti_read_current_mark(card_id, 0)+addstep;
+            }
+            /*if (STEPSTART <= STEPSTOP)
+            {
+                for (int k = STEPSTART; k <= STEPSTOP; k++)
+                {
+                    step = k;
                     substep = TransSub(step) - (int)stepnum[step] + 1;
                     if ((int)stepwork[step] == 0)//如果为运动
                     {
@@ -1602,11 +1737,8 @@ namespace RobotClassLib
                                     Application.DoEvents();
                                 }
                             }
-
-
                             substep = substep - 1;
                         }
-
                     }
                     else if ((int)stepwork[step - 1] == 1)//如果为延时
                     {
@@ -1629,7 +1761,7 @@ namespace RobotClassLib
                         return;
                     }
                 }
-            }
+            }*/
 
         }
         /// <summary>
@@ -2061,7 +2193,7 @@ namespace RobotClassLib
             }
         }
         /// <summary>
-        /// 机械爪操作函数,MyBitNo,IO口选择，OUT0接夹紧，OUT1接张开
+        /// 机械爪操作函数,MyBitNo,IO口选择，OUT0接夹紧，CN10 1,OUT1接张开 CN10 2
         /// </summary>
         /// <param name="MyBitNo"></param>
         /// <param name="?"></param>
@@ -2136,12 +2268,7 @@ namespace RobotClassLib
             while (readdate[2] != 0)
             {
                 Application.DoEvents();
-
             }
-
-
-
-
         }
         /// <summary>
         /// 排液函数,参数分别为速度、步距
@@ -2208,11 +2335,7 @@ namespace RobotClassLib
             while (readdate[2] != 0)
             {
                 Application.DoEvents();
-
-
             }
-
-
         }
         /// <summary>
         /// 泵停止函数
@@ -2280,7 +2403,7 @@ namespace RobotClassLib
             SendData(sendDat1);
         }
         /// <summary>
-        /// step转换到substep
+        /// step转换到substep，转换得到step大步里面的最后一分部
         /// </summary>
         /// <param name="n"></param>
         /// <returns></returns>
