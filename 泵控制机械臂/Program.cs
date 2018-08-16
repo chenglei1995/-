@@ -16,7 +16,7 @@ namespace 机械臂控制软件
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new 泵控制机械臂界面());
+            Application.Run(new 移液机械臂上位机界面());
         }
     }
 }

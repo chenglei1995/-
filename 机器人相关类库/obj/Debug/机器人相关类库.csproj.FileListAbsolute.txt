@@ -2,7 +2,6 @@ D:\程磊\华大基因\黑贝项目\机器人相关类库\bin\Debug\机器人相
 D:\程磊\华大基因\黑贝项目\机器人相关类库\bin\Debug\机器人相关类库.pdb
 D:\程磊\华大基因\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.dll
 D:\程磊\华大基因\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.pdb
-D:\程磊\华大基因\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.csprojResolveAssemblyReference.cache
 D:\程磊\华大基因\黑贝项目\机器人相关类库\obj\Debug\Interop.MLApp.dll
 D:\程磊\华大基因\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.csproj.ResolveComReference.cache
 C:\Users\TD\Desktop\黑贝项目\黑贝项目\机器人相关类库\bin\Debug\机器人相关类库.dll
@@ -19,3 +18,4 @@ C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\Interop.MLApp.d
 C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.csproj.ResolveComReference.cache
 C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.dll
 C:\Users\TD\Desktop\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.pdb
+D:\程磊\华大基因\黑贝项目\机器人相关类库\obj\Debug\机器人相关类库.csprojResolveAssemblyReference.cache

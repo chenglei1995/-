@@ -1,0 +1,7 @@
+D:\程磊\华大基因\控件\控件\bin\Release\控件.dll
+D:\程磊\华大基因\控件\控件\bin\Release\控件.pdb
+D:\程磊\华大基因\控件\控件\obj\Release\控件.Microwell_96.resources
+D:\程磊\华大基因\控件\控件\obj\Release\控件.csproj.GenerateResource.Cache
+D:\程磊\华大基因\控件\控件\obj\Release\控件.dll
+D:\程磊\华大基因\控件\控件\obj\Release\控件.pdb
+D:\程磊\华大基因\控件\控件\obj\Release\控件.csprojResolveAssemblyReference.cache

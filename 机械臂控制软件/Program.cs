@@ -16,7 +16,7 @@ namespace 机械臂控制软件
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new 机械臂控制软件界面());
+            Application.Run(new 搬运机械臂上位机界面());
         }
     }
 }

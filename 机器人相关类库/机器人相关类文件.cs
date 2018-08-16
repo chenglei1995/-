@@ -15,6 +15,7 @@ using System.IO.Ports;
 using csLTDMC;
 using System.Timers;
 using System.ComponentModel;
+using System.Threading;
 
 namespace RobotClassLib
 {
@@ -913,7 +914,7 @@ namespace RobotClassLib
     public class Robot
     {
         #region 字段
-        public bool ifmove = true;//是否运动的标志位，只有当ifmove为true时才运动
+        //public bool ifmove = true;//是否运动的标志位，只有当ifmove为true时才运动
         internal ushort card_id;
         private bool plotrobot = false;//是否图形仿真，默认为不仿真
         internal ArrayList q = new ArrayList();//位置集合，元素为1X6的double向量
@@ -1058,7 +1059,60 @@ namespace RobotClassLib
             get { return plotrobot;}
             set { plotrobot = value; }
         }
-     
+
+        #endregion
+        #region OUT输出改变相关操作，OUT改变一次，step加1
+        public delegate void IOChange();
+        public event IOChange OUT4_Change;//OUT4输出口改变事件
+        public event IOChange OUT5_Change;//OUT5输出口改变事件
+        int out4_value;
+        int out5_value;
+        public int Out4_Value
+        {
+            get { return out4_value; }
+            set
+            {
+                if (out4_value != value&&value==0)//如果Out4_value的值改变且变为0时，产生OUT4_Change事件
+                {
+                    OUT4_Change?.BeginInvoke(null,null);//异步委托
+                }
+                out4_value = value;
+            }
+        }
+        public int Out5_Value
+        {
+            get { return out5_value; }
+            set
+            {
+                if (out5_value != value && value == 0)//如果Out5_value的值改变且变为0时，产生OUT5_Change事件
+                {
+                    OUT5_Change?.BeginInvoke(null,null);//异步委托
+                }
+                out5_value = value;
+            }
+        }
+        //OUT4输出口改变事件处理程序
+        void OUT4_5_Changed_Operate()
+        {
+            step = step + 1;
+            if ((int)stepwork[step] == 2)//如果为泵操作
+            {
+                int _substep = 0;
+                _substep = TransSub(step) - (int)stepnum[step] + 1;
+                double operation = ((double[])q[_substep])[0];
+                double velocity = ((double[])q[_substep])[1];
+                double volume = ((double[])q[_substep])[2];
+                if (operation == 1)
+                {
+                     PumpAbsorb((int)velocity, volume);//速度单位为转/min
+                }
+                else
+                {
+                    PumpEject((int)velocity, volume);
+                }
+               // LTDMC.dmc_reverse_outbit(card_id, 6,0.1);//通过设置OUT6将Input0设置为1,时间为0.1s。需要将out5和input0连接
+            }
+        }
         #endregion
         /// <summary>
         /// 把默认构造函数私有化
@@ -1073,6 +1127,8 @@ namespace RobotClassLib
         public Robot(ushort CARD_ID)
         {
             card_id = CARD_ID;
+            OUT4_Change += OUT4_5_Changed_Operate;//OUT4输出口改变事件与事件处理程序绑定
+            OUT5_Change += OUT4_5_Changed_Operate;//OUT5输出口改变事件与事件处理程序绑定
         }
         /// <summary>
         /// 机器人初始化函数，包括回零，并且运动到初始状态
@@ -1121,78 +1177,74 @@ namespace RobotClassLib
         /// <param name="axis"></param>
         protected virtual void GoHome(ushort axis)
         {
-            if (ifmove == true)
+            double x_pos = -PI;//设置机械零点在D—H模型中的对应值
+            double y_pos = 178.27 / 180 * PI;
+            double z_pos = -PI / 2;
+            double a_pos = -(double)160.34 / 180 * PI;
+            double b_pos = -(double)118.74 / 180 * PI;
+            double c_pos = (double)126.5 / 180 * PI;
+            double pos = 0;
+            ushort homemode = 1;//回零模式
+            ushort myhome_dir = 0;//回零方向
+            ushort vel_mode = 1;//回零速度模式，1为高速回零
+            double max_vel = 0;
+            if (axis == axisy || axis == axisc)
             {
-                double x_pos = -PI;//设置机械零点在D—H模型中的对应值
-                double y_pos = 178.27 / 180 * PI;
-                double z_pos = -PI / 2;
-                double a_pos = -(double)160.34 / 180 * PI;
-                double b_pos = -(double)118.74 / 180 * PI;
-                double c_pos = (double)126.5 / 180 * PI;
-                double pos = 0;
-                ushort homemode = 1;//回零模式
-                ushort myhome_dir = 0;//回零方向
-                ushort vel_mode = 1;//回零速度模式，1为高速回零
-                double max_vel = 0;
-                if (axis == axisy || axis == axisc)
-                {
-                    myhome_dir = 1;
-                }
-                else
-                {
-                    myhome_dir = 0;
-                }
-                LTDMC.dmc_set_home_pin_logic(card_id, axis, 0, 0);//设置原点信号
-                LTDMC.dmc_set_homemode(card_id, axis, myhome_dir, vel_mode, homemode, 0);//设置脉冲当量
-                if (axis == 0)
-                {
-                    max_vel = xmax_vel;
-                    pos = x_pos;
-                }
-                else if (axis == 1)
-                {
-                    max_vel = ymax_vel;
-                    pos = y_pos;
-                }
-                else if (axis == 2)
-                {
-                    max_vel = zmax_vel;
-                    pos = z_pos;
-                }
-                else if (axis == 3)
-                {
-                    max_vel = amax_vel;
-                    pos = a_pos;
-                }
-                else if (axis == 4)
-                {
-                    max_vel = bmax_vel;
-                    pos = b_pos;
-                }
-                else if (axis == 5)
-                {
-                    max_vel = cmax_vel;
-                    pos = c_pos;
-                }
-
-                LTDMC.dmc_set_profile_unit(card_id, axis, 0, max_vel, 0.1, 0.1, 0);//设置速度
-                LTDMC.dmc_set_s_profile(card_id, axis, 0, 0.05);//设置S段时间
-                LTDMC.dmc_home_move(card_id, axis);//回零运动
-                while (LTDMC.dmc_check_done(card_id, axis) == 0)
-                {
-                    Application.DoEvents();//待定，不做任何事
-                }
-                LTDMC.dmc_set_position_unit(card_id, axis, pos);//设置当前位置
+                myhome_dir = 1;
             }
-        }
+            else
+            {
+                myhome_dir = 0;
+            }
+            LTDMC.dmc_set_home_pin_logic(card_id, axis, 0, 0);//设置原点信号
+            LTDMC.dmc_set_homemode(card_id, axis, myhome_dir, vel_mode, homemode, 0);//设置脉冲当量
+            if (axis == 0)
+            {
+                max_vel = xmax_vel;
+                pos = x_pos;
+            }
+            else if (axis == 1)
+            {
+                max_vel = ymax_vel;
+                pos = y_pos;
+            }
+            else if (axis == 2)
+            {
+                max_vel = zmax_vel;
+                pos = z_pos;
+            }
+            else if (axis == 3)
+            {
+                max_vel = amax_vel;
+                pos = a_pos;
+            }
+            else if (axis == 4)
+            {
+                max_vel = bmax_vel;
+                pos = b_pos;
+            }
+            else if (axis == 5)
+            {
+                max_vel = cmax_vel;
+                pos = c_pos;
+            }
+
+            LTDMC.dmc_set_profile_unit(card_id, axis, 0, max_vel, 0.1, 0.1, 0);//设置速度
+            LTDMC.dmc_set_s_profile(card_id, axis, 0, 0.05);//设置S段时间
+            LTDMC.dmc_home_move(card_id, axis);//回零运动
+            while (LTDMC.dmc_check_done(card_id, axis) == 0)
+            {
+                Application.DoEvents();//待定，不做任何事
+            }
+            LTDMC.dmc_set_position_unit(card_id, axis, pos);//设置当前位置
+        } 
         /// <summary>
         /// axis轴回到初始位置点
         /// </summary>
         /// <param name="axis"></param>
         protected void GoInitialPosition(ushort axis)
         {
-            if(ifmove==true)
-            {
+           
                 double x_move = 0;//到初始位姿各轴运动的角度
                 double y_move = PI / 2;
                 double z_move = 0;
@@ -1240,7 +1292,6 @@ namespace RobotClassLib
                 {
                     Application.DoEvents();//待定，不做任何事
                 }
-            }
         }
         /// <summary>
         /// 以现有位置、速度、加速度集合的最后一个元素为初始点，现在位置为终点，N为插入点数，TIME为消耗时间，规划轨迹，并加入到q,qd,qdd集合中
@@ -1328,7 +1379,7 @@ namespace RobotClassLib
                 qdd.Add(qdd1);
                 stepwork.Add(0);
                 stepnum.Add(1);
-                vel_vector.Add((double)0);
+                vel_vector.Add(default_vel);
             }
         }
         /// <summary>
@@ -1487,6 +1538,11 @@ namespace RobotClassLib
         /// <param name="STEPSTOP"></param>
         public void Start(int STEPSTART, int STEPSTOP)
         {
+            if(!ComDevice.IsOpen)
+            {
+                MessageBox.Show("请开启串口");
+                return;
+            }
             double max_vel = 0;
             if (STEPSTOP > stepnum.Count - 1 || STEPSTART > stepnum.Count - 1)
             {
@@ -1494,64 +1550,65 @@ namespace RobotClassLib
                 return;
             }
             int n = q.Count;
-            LTDMC.dmc_conti_open_list(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 });
-           // LTDMC.dmc_conti_set_lookahead_mode(card_id, 0, 1, 1000, 0, 100);
-           // LTDMC.dmc_conti_set_blend(card_id, 0, 1);
-            int addstep = 0;//如果有泵操作，作为中间变量，存储step值
+
+               //连续插补运动
             if (STEPSTART <= STEPSTOP)
             {
+                ushort OUT_Value;
+                step = STEPSTART - 1;//先减1，到OUT4_Changed_Operate函数时加回来，表示正向第几步运行
+                LTDMC.dmc_conti_open_list(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 });
+                LTDMC.dmc_conti_set_lookahead_mode(card_id, 0, 1, 1000, 0, 100);
+                LTDMC.dmc_conti_set_blend(card_id, 0, 1);
                 for (int k = STEPSTART; k <= STEPSTOP; k++)
                 {
+                    if(Convert.ToBoolean(k & 1))
+                    {
+                        OUT_Value = 4;
+                    }
+                    else
+                    {
+                        OUT_Value = 5;
+                    }
                     if ((int)stepwork[k] == 0)//如果为运动
                     {
+                        LTDMC.dmc_conti_delay_outbit_to_start(card_id, 0, OUT_Value, 0, 0, 0, 0.1);//OUT设置低电平0.1s
                         for (int i = 0; i < (int)stepnum[k]; i++)
                         {
                             max_vel = (double)vel_vector[TransSub(k)];
                             //当出现max_vel为零，而要运动的位置不为零时
-                            if (max_vel != 0)
+                            LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                            LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                            LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[TransSub(k) - (int)stepnum[k] + 1 + i], 1, 0);
+                            /*if (max_vel != 0)
                             {
                                 LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
                                 LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
-                                LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[TransSub(k)], 1,step);
-                            }
+                                LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[TransSub(k)-(int)stepnum[k]+1+i], 1,0);
+                            }*/
                         }
                     }
                     else if ((int)stepwork[k] == 1)//如果为延时
                     {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
                         double second = ((double[])q[TransSub(k)])[0];
                         LTDMC.dmc_conti_delay(card_id, 0, second, 0);
                     }
                     else if ((int)stepwork[k] == 2)//如果为泵操作
                     {
-                        LTDMC.dmc_conti_start_list(card_id, 0);
-                        LTDMC.dmc_conti_close_list(card_id, 0);
-                        while(LTDMC.dmc_conti_remain_space(card_id, 0)!=5000)
-                        {
-                            Application.DoEvents();
-                            step = LTDMC.dmc_conti_read_current_mark(card_id, 0)+addstep;
-                        }
-                        addstep = step+1;
-                        double operation = ((double[])q[TransSub(k)])[0];
-                        double velocity = ((double[])q[TransSub(k)])[1];
-                        double volume = ((double[])q[TransSub(k)])[2];
-                        if (operation == 1)
-                        {
-                            PumpAbsorb((int)velocity, volume);//速度单位为转/min
-                        }
-                        else
-                        {
-                            PumpEject((int)velocity, volume);
-                        }
-                        LTDMC.dmc_conti_open_list(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 });
-                        LTDMC.dmc_conti_set_lookahead_mode(card_id, 0, 1, 1000, 0, 100);
-                        LTDMC.dmc_conti_set_blend(card_id, 0, 1);
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                        LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                      //  LTDMC.dmc_conti_wait_input(card_id, 0, 0, 0, 0, 0);//设置等待Input0的输入口输入低电平，当泵操作完成后，会用OUT5将Input设置为0.5s
                     }
                     else if ((int)stepwork[k] == 3)//如果为打孔器操作,2号io口
                     {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                        LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
                         LTDMC.dmc_conti_write_outbit(card_id, 0, 2, 0, 0.5);
                     }
                     else if ((int)stepwork[k] == 4)//如果为机械爪操作
                     {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                        LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
                         double operation = ((double[])q[TransSub(k)])[0];
                         if (operation == 1)
                         {
@@ -1564,6 +1621,8 @@ namespace RobotClassLib
                     }
                     else if ((int)stepwork[k] == 5)//如果为PCR操作
                     {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                        LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
                         double operation = ((double[])q[TransSub(k)])[0];
                         if (operation == 1)
                         {
@@ -1574,11 +1633,14 @@ namespace RobotClassLib
                             LTDMC.dmc_conti_write_outbit(card_id, 0, 3, 1, 0);//闭合操作时，3号IO口置为1
                         }
                     }
-                    if (ifmove == false)//如果检测到运动标志位为false
-                    {
-                        return;
-                    }
                 }
+
+                LTDMC.dmc_conti_start_list(card_id, 0);
+                while (LTDMC.dmc_conti_remain_space(card_id, 0) != 5000)
+                {
+                    Application.DoEvents();//待定，空执行 
+                }
+                LTDMC.dmc_conti_close_list(card_id, 0);
             }
             else
             {
@@ -1618,20 +1680,10 @@ namespace RobotClassLib
                     {
                         substep = substep - 1;
                     }
-                    if (ifmove == false)//如果检测到运动标志位为false
-                    {
-                        return;
-                    }
                 }
             }
-            LTDMC.dmc_conti_start_list(card_id, 0);
-            LTDMC.dmc_conti_close_list(card_id, 0);
-            while (LTDMC.dmc_conti_remain_space(card_id, 0) != 5000)
-            {
-                Application.DoEvents();
-                step = LTDMC.dmc_conti_read_current_mark(card_id, 0)+addstep;
-            }
-            /*if (STEPSTART <= STEPSTOP)
+           /* //
+            if (STEPSTART <= STEPSTOP)
             {
                 for (int k = STEPSTART; k <= STEPSTOP; k++)
                 {
@@ -1761,8 +1813,8 @@ namespace RobotClassLib
                         return;
                     }
                 }
-            }*/
-
+            }
+            */
         }
         /// <summary>
         /// 第AXIS轴以VELOTCITY的角度速度旋转ANGLE度。
@@ -1772,17 +1824,15 @@ namespace RobotClassLib
         /// <param name="VELOCITY"></param>
         public void RotByAngle(ushort AXIS, double ANGLE, double VELOCITY)
         {
-            if(ifmove==true)
+            double arc = TransAngleToArc(ANGLE);
+            double arc_speed = TransAngleToArc(VELOCITY);
+            LTDMC.dmc_set_profile_unit(card_id, AXIS, 0, arc_speed, 0.1, 0.1, 0);
+            LTDMC.dmc_pmove_unit(card_id, AXIS, arc, 0);
+            while (LTDMC.dmc_check_done(card_id, AXIS) == 0)
             {
-                double arc = TransAngleToArc(ANGLE);
-                double arc_speed = TransAngleToArc(VELOCITY);
-                LTDMC.dmc_set_profile_unit(card_id, AXIS, 0, arc_speed, 0.1, 0.1, 0);
-                LTDMC.dmc_pmove_unit(card_id, AXIS, arc, 0);
-                while (LTDMC.dmc_check_done(card_id, AXIS) == 0)
-                {
-                    Application.DoEvents();
-                }
+                Application.DoEvents();
             }
+
         }
         /// <summary>
         /// 第AXIS轴以VELOTCITY的角度速度旋转到ANGLE度。
@@ -1792,25 +1842,42 @@ namespace RobotClassLib
         /// <param name="VELOCITY"></param>
         public void RotToAngle(ushort AXIS, double ANGLE, double VELOCITY)
         {
-            if(ifmove==true)
+            double arc = TransAngleToArc(ANGLE);
+            double arc_speed = TransAngleToArc(VELOCITY);
+            LTDMC.dmc_set_profile_unit(card_id, AXIS, 0, arc_speed, 0.1, 0.1, 0);
+            LTDMC.dmc_pmove_unit(card_id, AXIS, arc, 1);
+            while (LTDMC.dmc_check_done(card_id, AXIS) == 0)
             {
-                double arc = TransAngleToArc(ANGLE);
-                double arc_speed = TransAngleToArc(VELOCITY);
-                LTDMC.dmc_set_profile_unit(card_id, AXIS, 0, arc_speed, 0.1, 0.1, 0);
-                LTDMC.dmc_pmove_unit(card_id, AXIS, arc, 1);
-                while (LTDMC.dmc_check_done(card_id, AXIS) == 0)
-                {
-                    Application.DoEvents();
-                }
+                Application.DoEvents();
             }
         }
         /// <summary>
-        /// 停止运动
+        /// 连续插补运动暂停
         /// </summary>
-        public void Stop()
+        public void Conti_Pause()
         {
-            LTDMC.dmc_conti_stop_list(card_id, 0, 0);
-            LTDMC.dmc_stop_multicoor(card_id, 0,0);  
+            LTDMC.dmc_conti_pause_list(card_id, 0); 
+        }
+        /// <summary>
+        /// 连续插补停止运动
+        /// </summary>
+        public void Conti_Stop()
+        {
+            LTDMC.dmc_conti_stop_list(card_id, 0, 0);//减速停止
+        }
+        /// <summary>
+        /// 连续插补运动继续运动
+        /// </summary>
+        public void Conti_Restart()
+        {
+            LTDMC.dmc_conti_start_list(card_id, 0);
+        }
+        /// <summary>
+        /// 紧急停止所有轴
+        /// </summary>
+        public void Emerg_Stop()
+        {
+            LTDMC.dmc_emg_stop(card_id);
         }
         /// <summary>
         /// 机械臂保持姿态运动，VN为运动向量，N为插入点数，TIME为预计运动时间
@@ -1820,51 +1887,48 @@ namespace RobotClassLib
         /// <param name="TIME"></param>
         public void Move(double[] VN, int N, double TIME)
         {
-            if(ifmove==true)
+            double[] q1 = new double[6];
+            double[,] q2 = new double[N, 6];
+            double[,] qd2 = new double[N, 6];
+            double[,] qdd2 = new double[N, 6];
+            LTDMC.dmc_get_position_unit(card_id, axisx, ref q1[0]);
+            LTDMC.dmc_get_position_unit(card_id, axisy, ref q1[1]);
+            LTDMC.dmc_get_position_unit(card_id, axisz, ref q1[2]);
+            LTDMC.dmc_get_position_unit(card_id, axisa, ref q1[3]);
+            LTDMC.dmc_get_position_unit(card_id, axisb, ref q1[4]);
+            LTDMC.dmc_get_position_unit(card_id, axisc, ref q1[5]);
+            try
             {
-                double[] q1 = new double[6];
-                double[,] q2 = new double[N, 6];
-                double[,] qd2 = new double[N, 6];
-                double[,] qdd2 = new double[N, 6];
-                LTDMC.dmc_get_position_unit(card_id, axisx, ref q1[0]);
-                LTDMC.dmc_get_position_unit(card_id, axisy, ref q1[1]);
-                LTDMC.dmc_get_position_unit(card_id, axisz, ref q1[2]);
-                LTDMC.dmc_get_position_unit(card_id, axisa, ref q1[3]);
-                LTDMC.dmc_get_position_unit(card_id, axisb, ref q1[4]);
-                LTDMC.dmc_get_position_unit(card_id, axisc, ref q1[5]);
-                try
+                ToTrans(ref q2, ref qd2, ref qdd2, q1, VN, N, TIME);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString() + "无法到达，更改距离！", "提示");
+                return;
+            }
+            for (int i = 0; i < N; i++)
+            {
+                double[] Qt = new double[6];
+                double[] QDt = new double[6];
+                double[] QDDt = new double[6];
+                double max_vel = 0;
+                for (int j = 0; j < 6; j++)
                 {
-                    ToTrans(ref q2, ref qd2, ref qdd2, q1, VN, N, TIME);
+                    Qt[j] = q2[i, j];
+                    QDt[j] = qd2[i, j];
+                    QDDt[j] = qdd2[i, j];
                 }
-                catch(Exception ex)
+                max_vel = default_vel;
+                //当出现max_vel为零，而要运动的位置不为零时
+                if (max_vel != 0)
                 {
-                    MessageBox.Show(ex.ToString()+"无法到达，更改距离！", "提示");
-                    return;
-                }
-                for (int i = 0; i < N; i++)
-                {
-                    double[] Qt = new double[6];
-                    double[] QDt = new double[6];
-                    double[] QDDt = new double[6];
-                    double max_vel = 0;
-                    for (int j = 0; j < 6; j++)
-                    {
-                        Qt[j] = q2[i, j];
-                        QDt[j] = qd2[i, j];
-                        QDDt[j] = qdd2[i, j];
-                    }
-                    max_vel = default_vel;
-                    //当出现max_vel为零，而要运动的位置不为零时
-                    if (max_vel != 0)
-                    {
 
-                        LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
-                        LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
-                        LTDMC.dmc_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, Qt, 1);
-                        while (LTDMC.dmc_check_done_multicoor(card_id, 0) == 0)
-                        {
-                            Application.DoEvents();
-                        }
+                    LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                    LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                    LTDMC.dmc_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, Qt, 1);
+                    while (LTDMC.dmc_check_done_multicoor(card_id, 0) == 0)
+                    {
+                        Application.DoEvents();
                     }
                 }
             }
@@ -1876,60 +1940,57 @@ namespace RobotClassLib
         /// <param name="TIME"></param>
         public void GoLevel(int N, double TIME)
         {
-            if(ifmove==true)
+            double[] q1 = new double[6];
+            double[,] q2 = new double[N, 6];
+            double[,] qd2 = new double[N, 6];
+            double[,] qdd2 = new double[N, 6];
+            LTDMC.dmc_get_position_unit(card_id, axisx, ref q1[0]);
+            LTDMC.dmc_get_position_unit(card_id, axisy, ref q1[1]);
+            LTDMC.dmc_get_position_unit(card_id, axisz, ref q1[2]);
+            LTDMC.dmc_get_position_unit(card_id, axisa, ref q1[3]);
+            LTDMC.dmc_get_position_unit(card_id, axisb, ref q1[4]);
+            LTDMC.dmc_get_position_unit(card_id, axisc, ref q1[5]);
+            try
             {
-                double[] q1 = new double[6];
-                double[,] q2 = new double[N, 6];
-                double[,] qd2 = new double[N, 6];
-                double[,] qdd2 = new double[N, 6];
-                LTDMC.dmc_get_position_unit(card_id, axisx, ref q1[0]);
-                LTDMC.dmc_get_position_unit(card_id, axisy, ref q1[1]);
-                LTDMC.dmc_get_position_unit(card_id, axisz, ref q1[2]);
-                LTDMC.dmc_get_position_unit(card_id, axisa, ref q1[3]);
-                LTDMC.dmc_get_position_unit(card_id, axisb, ref q1[4]);
-                LTDMC.dmc_get_position_unit(card_id, axisc, ref q1[5]);
-                try
+                ToLevel(ref q2, ref qd2, ref qdd2, q1, N, TIME);
+            }
+            catch
+            {
+                MessageBox.Show("无法到达，更改距离！", "提示");
+                return;
+            }
+            for (int i = 0; i < N; i++)
+            {
+                double[] Qt = new double[6];
+                double[] QDt = new double[6];
+                double[] QDDt = new double[6];
+                double max_vel = 0;
+                for (int j = 0; j < 6; j++)
                 {
-                    ToLevel(ref q2, ref qd2, ref qdd2, q1, N, TIME);
+                    Qt[j] = q2[i, j];
+                    QDt[j] = qd2[i, j];
+                    QDDt[j] = qdd2[i, j];
                 }
-                catch
+                max_vel = Sqrt(Pow(QDt[0], 2) + Pow(QDt[1], 2) + Pow(QDt[2], 2) + Pow(QDt[3], 2) + Pow(QDt[4], 2) + Pow(QDt[5], 2));
+                //当出现max_vel为零，而要运动的位置不为零时
+                LTDMC.dmc_set_profile_unit(card_id, 0, 0, 0.2, 0.1, 0.1, 0);
+                LTDMC.dmc_pmove_unit(card_id, 0, Qt[0], 1);
+                LTDMC.dmc_set_profile_unit(card_id, 1, 0, 0.2, 0.1, 0.1, 0);
+                LTDMC.dmc_pmove_unit(card_id, 1, Qt[1], 1);
+                LTDMC.dmc_set_profile_unit(card_id, 2, 0, 0.2, 0.1, 0.1, 0);
+                LTDMC.dmc_pmove_unit(card_id, 2, Qt[2], 1);
+                LTDMC.dmc_set_profile_unit(card_id, 3, 0, 0.2, 0.1, 0.1, 0);
+                LTDMC.dmc_pmove_unit(card_id, 3, Qt[3], 1);
+                LTDMC.dmc_set_profile_unit(card_id, 4, 0, 0.2, 0.1, 0.1, 0);
+                LTDMC.dmc_pmove_unit(card_id, 4, Qt[4], 1);
+                LTDMC.dmc_set_profile_unit(card_id, 5, 0, 0.2, 0.1, 0.1, 0);
+                LTDMC.dmc_pmove_unit(card_id, 5, Qt[5], 1);
+                while (LTDMC.dmc_check_done(card_id, 0) == 0 || LTDMC.dmc_check_done(card_id, 1) == 0 || LTDMC.dmc_check_done(card_id, 2) == 0 || LTDMC.dmc_check_done(card_id, 3) == 0 || LTDMC.dmc_check_done(card_id, 4) == 0 || LTDMC.dmc_check_done(card_id, 5) == 0)
                 {
-                    MessageBox.Show("无法到达，更改距离！", "提示");
-                    return;
-                }
-                for (int i = 0; i < N; i++)
-                {
-                    double[] Qt = new double[6];
-                    double[] QDt = new double[6];
-                    double[] QDDt = new double[6];
-                    double max_vel = 0;
-                    for (int j = 0; j < 6; j++)
-                    {
-                        Qt[j] = q2[i, j];
-                        QDt[j] = qd2[i, j];
-                        QDDt[j] = qdd2[i, j];
-                    }
-                    max_vel = Sqrt(Pow(QDt[0], 2) + Pow(QDt[1], 2) + Pow(QDt[2], 2) + Pow(QDt[3], 2) + Pow(QDt[4], 2) + Pow(QDt[5], 2));
-                    //当出现max_vel为零，而要运动的位置不为零时
-                    LTDMC.dmc_set_profile_unit(card_id, 0, 0, 0.2, 0.1, 0.1, 0);
-                    LTDMC.dmc_pmove_unit(card_id, 0, Qt[0], 1);
-                    LTDMC.dmc_set_profile_unit(card_id, 1, 0, 0.2, 0.1, 0.1, 0);
-                    LTDMC.dmc_pmove_unit(card_id, 1, Qt[1], 1);
-                    LTDMC.dmc_set_profile_unit(card_id, 2, 0, 0.2, 0.1, 0.1, 0);
-                    LTDMC.dmc_pmove_unit(card_id, 2, Qt[2], 1);
-                    LTDMC.dmc_set_profile_unit(card_id, 3, 0, 0.2, 0.1, 0.1, 0);
-                    LTDMC.dmc_pmove_unit(card_id, 3, Qt[3], 1);
-                    LTDMC.dmc_set_profile_unit(card_id, 4, 0, 0.2, 0.1, 0.1, 0);
-                    LTDMC.dmc_pmove_unit(card_id, 4, Qt[4], 1);
-                    LTDMC.dmc_set_profile_unit(card_id, 5, 0, 0.2, 0.1, 0.1, 0);
-                    LTDMC.dmc_pmove_unit(card_id, 5, Qt[5], 1);
-                    while (LTDMC.dmc_check_done(card_id, 0) == 0 || LTDMC.dmc_check_done(card_id, 1) == 0 || LTDMC.dmc_check_done(card_id, 2) == 0 || LTDMC.dmc_check_done(card_id, 3) == 0 || LTDMC.dmc_check_done(card_id, 4) == 0 || LTDMC.dmc_check_done(card_id, 5) == 0)
-                    {
-                        Application.DoEvents();
-                    }
+                    Application.DoEvents();
                 }
             }
-            
+
             /*double[] q1 = new double[6];
             double[,] q2 = new double[N, 6];
             double[,] qd2 = new double[N, 6];
@@ -2058,7 +2119,6 @@ namespace RobotClassLib
         /// </summary>
         public void Plot_Robot()
         {
-            
             if (plotrobot==true)
             {
                 double[] q0 = new double[6];
@@ -2070,7 +2130,6 @@ namespace RobotClassLib
                 LTDMC.dmc_get_position_unit(card_id, 5, ref q0[5]);
                 PaintRobot(q0);
             }
-       
         }
         /// <summary>
         /// 获取当前机械臂实时角度位置
@@ -2210,7 +2269,7 @@ namespace RobotClassLib
         /// <param name="step1"></param>
         public void PumpAbsorb(int velocity, double VOLUME)
         {
-            int step = (int)(VOLUME / 0.0004154);
+            int stepnum = (int)(VOLUME / 0.0004154);
             byte[] sendDat = new byte[14];
             int addnum1 = 0;
             sendDat[0] = 0xcc;
@@ -2238,8 +2297,8 @@ namespace RobotClassLib
             sendDat1[0] = 0xcc;
             sendDat1[1] = 0x00;
             sendDat1[2] = 0x41;
-            sendDat1[3] = (byte)(step % 256);
-            sendDat1[4] = (byte)(step / 256);
+            sendDat1[3] = (byte)(stepnum % 256);
+            sendDat1[4] = (byte)(stepnum / 256);
             sendDat1[5] = 0xdd;
             for (int i = 0; i <= 5; i++)
             {
@@ -2277,7 +2336,7 @@ namespace RobotClassLib
         /// <param name="step1"></param>
         public void PumpEject(int velocity, double VOLUME)
         {
-            int step = (int)(VOLUME / 0.0004154);
+            int stepnum = (int)(VOLUME / 0.0004154);
             byte[] sendDat = new byte[14];
             int addnum1 = 0;
             sendDat[0] = 0xcc;
@@ -2305,8 +2364,8 @@ namespace RobotClassLib
             sendDat1[0] = 0xcc;
             sendDat1[1] = 0x00;
             sendDat1[2] = 0x42;
-            sendDat1[3] = (byte)(step % 256);
-            sendDat1[4] = (byte)(step / 256);
+            sendDat1[3] = (byte)(stepnum % 256);
+            sendDat1[4] = (byte)(stepnum / 256);
             sendDat1[5] = 0xdd;
             for (int i = 0; i <= 5; i++)
             {
@@ -2618,7 +2677,6 @@ namespace RobotClassLib
                 return;
             }
         }
-        
     }
     /// <summary>
     /// 打孔器机械臂类
@@ -2638,7 +2696,6 @@ namespace RobotClassLib
         private bool holekeypointfinished=false;//孔位关键点是否标定完成
         private bool holepointfinished=false;//空位点是否标定完成
         private ArrayList arrayhole = new ArrayList();//存储用于holestep和step转换的数组
-
         #region property
         /// <summary>
         /// 关键点集合属性
@@ -2794,69 +2851,66 @@ namespace RobotClassLib
         /// <param name="axis"></param>
         protected override void GoHome(ushort axis)
         {
-            if (ifmove == true)
+            double x_pos = -PI;//设置机械零点在D—H模型中的对应值
+            double y_pos = 179.24 / 180 * PI;
+            double z_pos = -PI / 2;
+            double a_pos = -(double)156.62 / 180 * PI;
+            double b_pos = -(double)120 / 180 * PI;
+            double c_pos = (double)129.99 / 180 * PI;
+            double pos = 0;
+            ushort homemode = 1;//回零模式
+            ushort myhome_dir = 0;//回零方向
+            ushort vel_mode = 1;//回零速度模式，1为高速回零
+            double max_vel = 0;
+            if (axis == axisy || axis == axisc)
             {
-                double x_pos = -PI;//设置机械零点在D—H模型中的对应值
-                double y_pos = 179.24 / 180 * PI;
-                double z_pos = -PI / 2;
-                double a_pos = -(double)156.62 / 180 * PI;
-                double b_pos = -(double)120 / 180 * PI;
-                double c_pos = (double)129.99 / 180 * PI;
-                double pos = 0;
-                ushort homemode = 1;//回零模式
-                ushort myhome_dir = 0;//回零方向
-                ushort vel_mode = 1;//回零速度模式，1为高速回零
-                double max_vel = 0;
-                if (axis == axisy || axis == axisc)
-                {
-                    myhome_dir = 1;
-                }
-                else
-                {
-                    myhome_dir = 0;
-                }
-                LTDMC.dmc_set_home_pin_logic(card_id, axis, 0, 0);//设置原点信号
-                LTDMC.dmc_set_homemode(card_id, axis, myhome_dir, vel_mode, homemode, 0);//设置脉冲当量
-                if (axis == 0)
-                {
-                    max_vel = xmax_vel;
-                    pos = x_pos;
-                }
-                else if (axis == 1)
-                {
-                    max_vel = ymax_vel;
-                    pos = y_pos;
-                }
-                else if (axis == 2)
-                {
-                    max_vel = zmax_vel;
-                    pos = z_pos;
-                }
-                else if (axis == 3)
-                {
-                    max_vel = amax_vel;
-                    pos = a_pos;
-                }
-                else if (axis == 4)
-                {
-                    max_vel = bmax_vel;
-                    pos = b_pos;
-                }
-                else if (axis == 5)
-                {
-                    max_vel = cmax_vel;
-                    pos = c_pos;
-                }
-
-                LTDMC.dmc_set_profile_unit(card_id, axis, 0, max_vel, 0.1, 0.1, 0);//设置速度
-                LTDMC.dmc_set_s_profile(card_id, axis, 0, 0.05);//设置S段时间
-                LTDMC.dmc_home_move(card_id, axis);//回零运动
-                while (LTDMC.dmc_check_done(card_id, axis) == 0)
-                {
-                    Application.DoEvents();//待定，不做任何事
-                }
-                LTDMC.dmc_set_position_unit(card_id, axis, pos);//设置当前位置
+                myhome_dir = 1;
             }
+            else
+            {
+                myhome_dir = 0;
+            }
+            LTDMC.dmc_set_home_pin_logic(card_id, axis, 0, 0);//设置原点信号
+            LTDMC.dmc_set_homemode(card_id, axis, myhome_dir, vel_mode, homemode, 0);//设置脉冲当量
+            if (axis == 0)
+            {
+                max_vel = xmax_vel;
+                pos = x_pos;
+            }
+            else if (axis == 1)
+            {
+                max_vel = ymax_vel;
+                pos = y_pos;
+            }
+            else if (axis == 2)
+            {
+                max_vel = zmax_vel;
+                pos = z_pos;
+            }
+            else if (axis == 3)
+            {
+                max_vel = amax_vel;
+                pos = a_pos;
+            }
+            else if (axis == 4)
+            {
+                max_vel = bmax_vel;
+                pos = b_pos;
+            }
+            else if (axis == 5)
+            {
+                max_vel = cmax_vel;
+                pos = c_pos;
+            }
+
+            LTDMC.dmc_set_profile_unit(card_id, axis, 0, max_vel, 0.1, 0.1, 0);//设置速度
+            LTDMC.dmc_set_s_profile(card_id, axis, 0, 0.05);//设置S段时间
+            LTDMC.dmc_home_move(card_id, axis);//回零运动
+            while (LTDMC.dmc_check_done(card_id, axis) == 0)
+            {
+                Application.DoEvents();//待定，不做任何事
+            }
+            LTDMC.dmc_set_position_unit(card_id, axis, pos);//设置当前位置
         }
         /// <summary>
         /// 构造函数
@@ -3214,87 +3268,174 @@ namespace RobotClassLib
         public void Start()
         {
             double max_vel = 0;
-          
-                for (int k = 0; k <= stepnum.Count-1; k++)
+            step =-1;//先减1，到OUT4_Changed_Operate函数时加回来，表示正向第几步运行
+            ushort OUT_Value;
+            LTDMC.dmc_conti_open_list(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 });
+            LTDMC.dmc_conti_set_lookahead_mode(card_id, 0, 1, 1000, 0, 100);
+            LTDMC.dmc_conti_set_blend(card_id, 0, 1);
+            for (int k = 0; k <= StepNum.Count-1; k++)
+            {
+                if (Convert.ToBoolean(k & 1))
                 {
-                    step = k;
-                    substep = TransSub(step) - (int)stepnum[step] + 1;
-                    if ((int)stepwork[step] == 0)//如果为运动
-                    {
-                        for (int i = 0; i < (int)stepnum[step]; i++)
-                        {
-                            max_vel = (double)vel_vector[substep];
-                            //当出现max_vel为零，而要运动的位置不为零时
-                            if (max_vel != 0)
-                            {
-                                LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
-                                LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
-                                LTDMC.dmc_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[substep], 1);
-                                while (LTDMC.dmc_check_done_multicoor(card_id, 0) == 0)
-                                {
-                                    Application.DoEvents();
-                                }
-                            }
-                            substep = substep + 1;
-                        }
-                    }
-                    else if ((int)stepwork[step] == 1)//如果为延时
-                    {
-                        double second = ((double[])q[substep])[0];
-                        delayTime(second);
-                        substep = substep + 1;
-                    }
-                    else if ((int)stepwork[step] == 2)//如果为泵操作
-                    {
-                        double operation = ((double[])q[substep])[0];
-                        double velocity = ((double[])q[substep])[1];
-                        double volume = ((double[])q[substep])[2];
-                        if (operation == 1)
-                        {
-                            PumpAbsorb((int)velocity, volume);//速度单位为转/min
-                        }
-                        else
-                        {
-                            PumpEject((int)velocity, volume);
-                        }
-                        substep = substep + 1;
-                    }
-                    else if ((int)stepwork[step] == 3)//如果为打孔器操作
-                    {
-                        HoleOperate();
-                        substep = substep + 1;
-                    }
-                    else if ((int)stepwork[step] == 4)//如果为机械爪操作
-                    {
-                        double operation = ((double[])q[substep])[0];
-                        if (operation == 1)
-                        {
-                            ClawOperate(0);
-                        }
-                        else
-                        {
-                            ClawOperate(1);
-                        }
-                        substep = substep + 1;
-                    }
-                else if ((int)stepwork[step] == 5)//如果为PCR操作
+                    OUT_Value = 4;
+                }
+                else
                 {
-                    double operation = ((double[])q[substep])[0];
+                    OUT_Value = 5;
+                }
+                if ((int)stepwork[k] == 0)//如果为运动
+                {
+                    LTDMC.dmc_conti_delay_outbit_to_start(card_id, 0, OUT_Value, 0, 0, 0, 0.1);//OUT设置低电平0.1s
+                    for (int i = 0; i < (int)stepnum[k]; i++)
+                    {
+                        max_vel = (double)vel_vector[TransSub(k)];
+                        //当出现max_vel为零，而要运动的位置不为零时
+                        LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                        LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                        LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[TransSub(k) - (int)stepnum[k] + 1 + i], 1, 0);
+                        /*if (max_vel != 0)
+                        {
+                            LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                            LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                            LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[TransSub(k)-(int)stepnum[k]+1+i], 1,0);
+                        }*/
+                    }
+                }
+                else if ((int)stepwork[k] == 1)//如果为延时
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    double second = ((double[])q[TransSub(k)])[0];
+                    LTDMC.dmc_conti_delay(card_id, 0, second, 0);
+                }
+                else if ((int)stepwork[k] == 2)//如果为泵操作
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                    //  LTDMC.dmc_conti_wait_input(card_id, 0, 0, 0, 0, 0);//设置等待Input0的输入口输入低电平，当泵操作完成后，会用OUT5将Input设置为0.5s
+                }
+                else if ((int)stepwork[k] == 3)//如果为打孔器操作,2号io口
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, 2, 0, 0.5);
+                }
+                else if ((int)stepwork[k] == 4)//如果为机械爪操作
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                    double operation = ((double[])q[TransSub(k)])[0];
                     if (operation == 1)
                     {
-                        PcrOperate(true);
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 0, 0, 0.5);//0号io口
                     }
                     else
                     {
-                        PcrOperate(false);
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 1, 0, 0.5);//1号io口
                     }
-                    substep = substep + 1;
                 }
-                if (ifmove == false)//如果检测到运动标志位为false
+                else if ((int)stepwork[k] == 5)//如果为PCR操作
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                    double operation = ((double[])q[TransSub(k)])[0];
+                    if (operation == 1)
                     {
-                        return;
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 3, 0, 0);//张开操作是，3号IO口置为0
                     }
+                    else
+                    {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 3, 1, 0);//闭合操作时，3号IO口置为1
+                    }
+                }
             }
+
+            LTDMC.dmc_conti_start_list(card_id, 0);
+            while (LTDMC.dmc_conti_remain_space(card_id, 0) != 5000)
+            {
+                Application.DoEvents();//待定，空执行 
+            }
+            LTDMC.dmc_conti_close_list(card_id, 0);
+            /*
+                  for (int k = 0; k <= stepnum.Count-1; k++)
+                  {
+                      step = k;
+                      substep = TransSub(step) - (int)stepnum[step] + 1;
+                      if ((int)stepwork[step] == 0)//如果为运动
+                      {
+                          for (int i = 0; i < (int)stepnum[step]; i++)
+                          {
+                              max_vel = (double)vel_vector[substep];
+                              //当出现max_vel为零，而要运动的位置不为零时
+                              if (max_vel != 0)
+                              {
+                                  LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                                  LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                                  LTDMC.dmc_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[substep], 1);
+                                  while (LTDMC.dmc_check_done_multicoor(card_id, 0) == 0)
+                                  {
+                                      Application.DoEvents();
+                                  }
+                              }
+                              substep = substep + 1;
+                          }
+                      }
+                      else if ((int)stepwork[step] == 1)//如果为延时
+                      {
+                          double second = ((double[])q[substep])[0];
+                          delayTime(second);
+                          substep = substep + 1;
+                      }
+                      else if ((int)stepwork[step] == 2)//如果为泵操作
+                      {
+                          double operation = ((double[])q[substep])[0];
+                          double velocity = ((double[])q[substep])[1];
+                          double volume = ((double[])q[substep])[2];
+                          if (operation == 1)
+                          {
+                              PumpAbsorb((int)velocity, volume);//速度单位为转/min
+                          }
+                          else
+                          {
+                              PumpEject((int)velocity, volume);
+                          }
+                          substep = substep + 1;
+                      }
+                      else if ((int)stepwork[step] == 3)//如果为打孔器操作
+                      {
+                          HoleOperate();
+                          substep = substep + 1;
+                      }
+                      else if ((int)stepwork[step] == 4)//如果为机械爪操作
+                      {
+                          double operation = ((double[])q[substep])[0];
+                          if (operation == 1)
+                          {
+                              ClawOperate(0);
+                          }
+                          else
+                          {
+                              ClawOperate(1);
+                          }
+                          substep = substep + 1;
+                      }
+                  else if ((int)stepwork[step] == 5)//如果为PCR操作
+                  {
+                      double operation = ((double[])q[substep])[0];
+                      if (operation == 1)
+                      {
+                          PcrOperate(true);
+                      }
+                      else
+                      {
+                          PcrOperate(false);
+                      }
+                      substep = substep + 1;
+                  }
+                  if (ifmove == false)//如果检测到运动标志位为false
+                      {
+                          return;
+                      }
+              }*/
         }
         /// <summary>
         /// Checks[,]数组的下标变换到1维
@@ -3662,69 +3803,66 @@ namespace RobotClassLib
         /// <param name="axis"></param>
         protected override void GoHome(ushort axis)
         {
-            if (ifmove == true)
+            double x_pos = -PI;//设置机械零点在D—H模型中的对应值
+            double y_pos = 178.27 / 180 * PI;
+            double z_pos = -PI / 2;
+            double a_pos = -(double)157.82 / 180 * PI;
+            double b_pos = -(double)121.03 / 180 * PI;
+            double c_pos = (double)129.99 / 180 * PI;
+            double pos = 0;
+            ushort homemode = 1;//回零模式
+            ushort myhome_dir = 0;//回零方向
+            ushort vel_mode = 1;//回零速度模式，1为高速回零
+            double max_vel = 0;
+            if (axis == axisy || axis == axisc)
             {
-                double x_pos = -PI;//设置机械零点在D—H模型中的对应值
-                double y_pos = 178.27 / 180 * PI;
-                double z_pos = -PI / 2;
-                double a_pos = -(double)157.82 / 180 * PI;
-                double b_pos = -(double)121.03 / 180 * PI;
-                double c_pos = (double)129.99 / 180 * PI;
-                double pos = 0;
-                ushort homemode = 1;//回零模式
-                ushort myhome_dir = 0;//回零方向
-                ushort vel_mode = 1;//回零速度模式，1为高速回零
-                double max_vel = 0;
-                if (axis == axisy || axis == axisc)
-                {
-                    myhome_dir = 1;
-                }
-                else
-                {
-                    myhome_dir = 0;
-                }
-                LTDMC.dmc_set_home_pin_logic(card_id, axis, 0, 0);//设置原点信号
-                LTDMC.dmc_set_homemode(card_id, axis, myhome_dir, vel_mode, homemode, 0);//设置脉冲当量
-                if (axis == 0)
-                {
-                    max_vel = xmax_vel;
-                    pos = x_pos;
-                }
-                else if (axis == 1)
-                {
-                    max_vel = ymax_vel;
-                    pos = y_pos;
-                }
-                else if (axis == 2)
-                {
-                    max_vel = zmax_vel;
-                    pos = z_pos;
-                }
-                else if (axis == 3)
-                {
-                    max_vel = amax_vel;
-                    pos = a_pos;
-                }
-                else if (axis == 4)
-                {
-                    max_vel = bmax_vel;
-                    pos = b_pos;
-                }
-                else if (axis == 5)
-                {
-                    max_vel = cmax_vel;
-                    pos = c_pos;
-                }
-
-                LTDMC.dmc_set_profile_unit(card_id, axis, 0, max_vel, 0.1, 0.1, 0);//设置速度
-                LTDMC.dmc_set_s_profile(card_id, axis, 0, 0.05);//设置S段时间
-                LTDMC.dmc_home_move(card_id, axis);//回零运动
-                while (LTDMC.dmc_check_done(card_id, axis) == 0)
-                {
-                    Application.DoEvents();//待定，不做任何事
-                }
-                LTDMC.dmc_set_position_unit(card_id, axis, pos);//设置当前位置
+                myhome_dir = 1;
             }
+            else
+            {
+                myhome_dir = 0;
+            }
+            LTDMC.dmc_set_home_pin_logic(card_id, axis, 0, 0);//设置原点信号
+            LTDMC.dmc_set_homemode(card_id, axis, myhome_dir, vel_mode, homemode, 0);//设置脉冲当量
+            if (axis == 0)
+            {
+                max_vel = xmax_vel;
+                pos = x_pos;
+            }
+            else if (axis == 1)
+            {
+                max_vel = ymax_vel;
+                pos = y_pos;
+            }
+            else if (axis == 2)
+            {
+                max_vel = zmax_vel;
+                pos = z_pos;
+            }
+            else if (axis == 3)
+            {
+                max_vel = amax_vel;
+                pos = a_pos;
+            }
+            else if (axis == 4)
+            {
+                max_vel = bmax_vel;
+                pos = b_pos;
+            }
+            else if (axis == 5)
+            {
+                max_vel = cmax_vel;
+                pos = c_pos;
+            }
+
+            LTDMC.dmc_set_profile_unit(card_id, axis, 0, max_vel, 0.1, 0.1, 0);//设置速度
+            LTDMC.dmc_set_s_profile(card_id, axis, 0, 0.05);//设置S段时间
+            LTDMC.dmc_home_move(card_id, axis);//回零运动
+            while (LTDMC.dmc_check_done(card_id, axis) == 0)
+            {
+                Application.DoEvents();//待定，不做任何事
+            }
+            LTDMC.dmc_set_position_unit(card_id, axis, pos);//设置当前位置
         }
         /// <summary>
         /// 构造函数
@@ -4063,8 +4201,100 @@ namespace RobotClassLib
         /// </summary>
         public void Start()
         {
+            if(!ComDevice.IsOpen)
+            {
+                MessageBox.Show("请开启串口");
+                return;
+            }
             double max_vel = 0;
+            step = -1;//先减1，到OUT4_Changed_Operate函数时加回来，表示正向第几步运行
+            ushort OUT_Value;
+            LTDMC.dmc_conti_open_list(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 });
+            LTDMC.dmc_conti_set_lookahead_mode(card_id, 0, 1, 1000, 0, 100);
+            LTDMC.dmc_conti_set_blend(card_id, 0, 1);
+            for (int k =0; k <= StepNum.Count-1; k++)
+            {
+                if (Convert.ToBoolean(k & 1))
+                {
+                    OUT_Value = 4;
+                }
+                else
+                {
+                    OUT_Value = 5;
+                }
+                if ((int)stepwork[k] == 0)//如果为运动
+                {
+                    LTDMC.dmc_conti_delay_outbit_to_start(card_id, 0, OUT_Value, 0, 0, 0, 0.1);//OUT设置低电平0.1s
+                    for (int i = 0; i < (int)stepnum[k]; i++)
+                    {
+                        max_vel = (double)vel_vector[TransSub(k)];
+                        //当出现max_vel为零，而要运动的位置不为零时
+                        LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                        LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                        LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[TransSub(k) - (int)stepnum[k] + 1 + i], 1, 0);
+                        /*if (max_vel != 0)
+                        {
+                            LTDMC.dmc_set_vector_profile_unit(card_id, 0, 0, max_vel, 0.1, 0.1, 0);
+                            LTDMC.dmc_conti_set_s_profile(card_id, 0, 0, 0.05);
+                            LTDMC.dmc_conti_line_unit(card_id, 0, 6, new ushort[] { 0, 1, 2, 3, 4, 5 }, (double[])q[TransSub(k)-(int)stepnum[k]+1+i], 1,0);
+                        }*/
+                    }
+                }
+                else if ((int)stepwork[k] == 1)//如果为延时
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    double second = ((double[])q[TransSub(k)])[0];
+                    LTDMC.dmc_conti_delay(card_id, 0, second, 0);
+                }
+                else if ((int)stepwork[k] == 2)//如果为泵操作
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                    //  LTDMC.dmc_conti_wait_input(card_id, 0, 0, 0, 0, 0);//设置等待Input0的输入口输入低电平，当泵操作完成后，会用OUT5将Input设置为0.5s
+                }
+                else if ((int)stepwork[k] == 3)//如果为打孔器操作,2号io口
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, 2, 0, 0.5);
+                }
+                else if ((int)stepwork[k] == 4)//如果为机械爪操作
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                    double operation = ((double[])q[TransSub(k)])[0];
+                    if (operation == 1)
+                    {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 0, 0, 0.5);//0号io口
+                    }
+                    else
+                    {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 1, 0, 0.5);//1号io口
+                    }
+                }
+                else if ((int)stepwork[k] == 5)//如果为PCR操作
+                {
+                    LTDMC.dmc_conti_write_outbit(card_id, 0, OUT_Value, 0, 0.1);//OUTio口设置低电平0.1s
+                    LTDMC.dmc_conti_delay(card_id, 0, 0.1, 0);
+                    double operation = ((double[])q[TransSub(k)])[0];
+                    if (operation == 1)
+                    {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 3, 0, 0);//张开操作是，3号IO口置为0
+                    }
+                    else
+                    {
+                        LTDMC.dmc_conti_write_outbit(card_id, 0, 3, 1, 0);//闭合操作时，3号IO口置为1
+                    }
+                }
+            }
 
+            LTDMC.dmc_conti_start_list(card_id, 0);
+            while (LTDMC.dmc_conti_remain_space(card_id, 0) != 5000)
+            {
+                Application.DoEvents();//待定，空执行 
+            }
+            LTDMC.dmc_conti_close_list(card_id, 0);
+            /*
             for (int k = 0; k <= stepnum.Count - 1; k++)
             {
                 step = k;
@@ -4144,7 +4374,7 @@ namespace RobotClassLib
                 {
                     return;
                 }
-            }
+            }*/
         }
         /// <summary>
         /// Checks[,]数组的下标变换到1维
